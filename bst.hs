@@ -1,4 +1,5 @@
 import Control.Monad
+import Control.Applicative
 
 data BinTree a = Empty
                | Node a (BinTree a) (BinTree a)

@@ -1,0 +1,49 @@
+	Thu Sep  8 16:28 2016 Time and Allocation Profiling Report  (Final)
+
+	   armies +RTS -p -RTS
+
+	total time  =       31.22 secs   (31216 ticks @ 1000 us, 1 processor)
+	total alloc = 40,720,072,112 bytes  (excludes profiling overheads)
+
+COST CENTRE MODULE  %time %alloc
+
+main.\      Main     96.2   97.4
+sumHeaps    Main      1.5    1.1
+
+
+                                                               individual     inherited
+COST CENTRE          MODULE                  no.     entries  %time %alloc   %time %alloc
+
+MAIN                 MAIN                     49           0    0.0    0.0   100.0  100.0
+ CAF                 Main                     97           0    0.0    0.0   100.0  100.0
+  main               Main                     98           1    0.9    0.6   100.0  100.0
+   main.iarmy        Main                    102           1    0.0    0.0     0.0    0.0
+   main.\            Main                     99     1310721   96.2   97.4    99.1   99.4
+    insert           Main                    105     1048576    0.2    0.3     1.7    1.2
+     singleHeap      Main                    108     1048576    0.0    0.1     0.0    0.1
+      singleton      Main                    109     1048576    0.0    0.0     0.0    0.0
+     sumHeaps        Main                    107     1835008    0.8    0.5     1.4    0.7
+      sumHeaps.ty    Main                    123      262144    0.0    0.0     0.0    0.0
+      sumHeaps.(...) Main                    121      262144    0.0    0.0     0.1    0.1
+       sumTree       Main                    122      262144    0.1    0.1     0.1    0.1
+      sumHeaps.r     Main                    120      262144    0.0    0.0     0.0    0.0
+      sumHeaps.r     Main                    114      524288    0.1    0.0     0.1    0.0
+      sumHeaps.(...) Main                    111      524288    0.0    0.0     0.3    0.1
+       sumTrees      Main                    112      524288    0.1    0.0     0.3    0.1
+        sumTree      Main                    113      524288    0.3    0.1     0.3    0.1
+      sumHeaps.txy   Main                    110      524288    0.1    0.0     0.1    0.0
+     merge           Main                    106     1048576    0.0    0.1     0.0    0.1
+    sumHeaps         Main                    104     1310697    0.7    0.6     1.2    0.7
+     sumHeaps.r      Main                    119     1048554    0.1    0.0     0.1    0.0
+     sumHeaps.(...)  Main                    116     1048554    0.0    0.0     0.3    0.1
+      sumTrees       Main                    117     1048554    0.1    0.0     0.3    0.1
+       sumTree       Main                    118     1048554    0.2    0.1     0.2    0.1
+     sumHeaps.txy    Main                    115     1048554    0.1    0.0     0.1    0.0
+    merge            Main                    103      262143    0.0    0.0     0.0    0.0
+    findMin          Main                    100           2    0.0    0.0     0.0    0.0
+     findMin.fs      Main                    101          27    0.0    0.0     0.0    0.0
+ CAF                 GHC.Conc.Signal          92           0    0.0    0.0     0.0    0.0
+ CAF                 GHC.IO.Encoding          89           0    0.0    0.0     0.0    0.0
+ CAF                 GHC.IO.Handle.FD         88           0    0.0    0.0     0.0    0.0
+ CAF                 Text.Read.Lex            85           0    0.0    0.0     0.0    0.0
+ CAF                 GHC.IO.Encoding.Iconv    73           0    0.0    0.0     0.0    0.0

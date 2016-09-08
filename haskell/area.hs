@@ -16,16 +16,13 @@ area :: Int -> Int -> Poly -> Double
 area l r p = integrate l r (eval p)
 
 vol :: Int -> Int -> Poly -> Double
-vol l r p = integrate l r (\x -> (eval p x)*(eval p x)*3.14159275358979)
+vol l r p = integrate l r (\x -> eval p x * eval p x * 3.14159275358979)
 
 -- This function should return a list [area, volume].
 solve :: Int -> Int -> [Int] -> [Int] -> [Double]
-solve l r a b = [(area l r p), (vol l r p)]
+solve l r a b = [area l r p, vol l r p]
     where
       p = Poly a b
-
-cosas :: Int
-cosas = (34+34)
 
 --Input/Output.
 main :: IO ()

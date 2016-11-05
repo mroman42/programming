@@ -1,0 +1,549 @@
+#+TITLE: Programming Challenges
+#+AUTHOR: Mario Román
+
+* Hackerrank
+** Data Structures
+*** Heap
+**** Find the running median
+#+BEGIN_SRC c++
+#include<iostream>
+#include<iomanip>
+#include<vector>
+
+using namespace std;
+
+bool lesst(int a,int b) {return a < b;}
+bool moret(int a,int b) {return a > b;}
+
+
+void insert(vector<int>& max_heap, bool (*compare)(int,int), int a) {
+  max_heap.push_back(a);
+  int pointer = max_heap.size()-1;
+  int parent = (pointer-1)/2;
+  
+  while (pointer != 0 and compare(max_heap[parent],max_heap[pointer])) {
+    int swap = max_heap[pointer];
+    max_heap[pointer] = max_heap[parent];
+    max_heap[parent] = swap;
+
+    pointer = parent;
+    parent = (pointer-1)/2;
+  }
+}
+
+
+// compare < max_heap -> lesser
+// compare > min_heap -> greater
+int pop(vector<int>& max_heap, bool (*compare)(int,int)) {
+  int result = max_heap[0];
+  max_heap[0] = max_heap[max_heap.size()-1];
+  max_heap.resize(max_heap.size()-1);
+  unsigned pointer = 0;
+  bool change_left =
+    ((pointer*2+1) < max_heap.size()) and compare(max_heap[pointer], max_heap[pointer*2+1]);
+  bool change_right =
+    ((pointer*2+2) < max_heap.size()) and compare(max_heap[pointer], max_heap[pointer*2+2]);
+  
+  while (change_left or change_right) {
+    if (change_left and change_right) {
+      if (compare(max_heap[pointer*2+1],max_heap[pointer*2+2]))
+	change_left = false;
+      else
+	change_right = false;
+    }
+    if (change_left) {
+    int swap = max_heap[pointer];
+      max_heap[pointer] = max_heap[pointer*2+1];
+      max_heap[pointer*2+1] = swap;
+      pointer = pointer*2+1;
+    }
+    else if (change_right) {
+      int swap = max_heap[pointer];
+      max_heap[pointer] = max_heap[pointer*2+2];
+      max_heap[pointer*2+2] = swap;
+      pointer = pointer*2+2;
+    }
+
+    change_left =
+      ((pointer*2+1) < max_heap.size()) and compare(max_heap[pointer], max_heap[pointer*2+1]);
+    change_right =
+      ((pointer*2+2) < max_heap.size()) and compare(max_heap[pointer], max_heap[pointer*2+2]);
+  }
+
+  return result;
+}
+
+int main() {
+  cout << fixed << setprecision(1);
+  int n; cin >> n;
+  vector<int> max_heap;
+  vector<int> min_heap;
+  float median = 0;
+  int diff = 0;
+  int read;
+
+  // First element
+  cin >> read;
+  max_heap.push_back(read);
+  median = read;
+  diff = 1;
+  cout << float(median) << endl;
+
+  // All elements
+  for (int i=0; i<n-1; i++) {
+    // Inserts new element
+    cin >> read;
+    
+    if (read >= median) {
+      insert(min_heap,moret,read);
+      if (min_heap.size() > max_heap.size())
+	insert(max_heap,lesst,pop(min_heap,moret));
+    }
+
+    if (read < median) {
+      insert(max_heap,lesst,read);
+      if (max_heap.size() > min_heap.size()+1)
+	insert(min_heap,moret,pop(max_heap,lesst));
+    }
+    
+    // Recomputes median
+    if (i%2 == 0)
+      median = (max_heap[0] + min_heap[0])/2.0;
+    else
+      median = (max_heap[0]);
+    cout << float(median) << endl;
+
+    // cerr << "max: [";
+    // for (unsigned i=0; i<max_heap.size();i++)
+    //   cerr <<max_heap[i] << ",";
+    // cerr << "]\n";
+    // cerr << "min: [";
+    // for (unsigned i=0; i<min_heap.size();i++)
+    //   cerr <<min_heap[i] << ",";
+    // cerr << "]\n";
+  }
+}
+#+END_SRC
+
+** Functional Programming
+*** Introduction
+**** Solve me first FP
+#+BEGIN_SRC haskell
+solveMeFirst a b = a + b
+
+main = do
+    val1 <- readLn
+    val2 <- readLn
+    let sum = solveMeFirst val1 val2
+    print sum
+#+END_SRC
+
+**** Hello world
+#+BEGIN_SRC haskell
+hello_world = putStrLn "Hello World"
+main = do
+   hello_world
+#+END_SRC
+
+**** Hello world N times
+#+BEGIN_SRC haskell
+hello_worlds n = mapM_ putStrLn (replicate n "Hello World")
+main = do
+   n <- readLn :: IO Int
+   hello_worlds n
+#+END_SRC
+
+**** List replication
+#+BEGIN_SRC haskell
+f n = concat . map (replicate n)
+main = do
+   n <- readLn :: IO Int
+   inputdata <- getContents
+   mapM_ putStrLn $ map show $ f n $ map (read :: String -> Int) $ lines inputdata
+#+END_SRC
+**** Filter Array
+#+BEGIN_SRC haskell
+f :: Int -> [Int] -> [Int]
+f _ [] = [] 
+f n (x:xs)
+    | (x < n) = (x:(f n xs))
+    | otherwise = f n xs
+
+main = do 
+    n <- readLn :: IO Int 
+    inputdata <- getContents 
+    let 
+        numbers = map read (lines inputdata) :: [Int] 
+    putStrLn . unlines $ (map show . f n) numbers
+#+END_SRC
+**** Filter Positions in a list
+#+BEGIN_SRC haskell
+f :: [Int] -> [Int]
+f (x:xs) = g xs
+f [] = []
+
+g :: [Int] -> [Int]
+g (x:xs) = x : (f xs)
+g [] = []
+
+main = do
+   inputdata <- getContents
+   mapM_ (putStrLn. show). f. map read. lines $ inputdata
+#+END_SRC
+**** Array of N elements
+#+BEGIN_SRC haskell
+fn n = [1..n]
+#+END_SRC
+**** Reverse a list
+#+BEGIN_SRC haskell
+  rev [] = []
+  rev (x:xs) = (rev xs) ++ [x]
+
+  main = do
+    inputdata <- getContents
+    mapM_ putStrLn $ map show $ rev $ map (read :: String -> Int) $ lines inputdata
+#+END_SRC
+**** Sum of Odd elements
+#+BEGIN_SRC haskell
+isOdd x = (mod x 2 == 1)
+f = sum . (filter (isOdd))
+
+main = do
+   inputdata <- getContents
+   putStrLn $ show $ f $ map (read :: String -> Int) $ lines inputdata
+#+END_SRC
+**** List Length
+#+BEGIN_SRC haskell
+  len :: [a] -> Int
+  len lst = case lst of
+              []     -> 0
+              (x:xs) -> succ (len xs)
+
+  main = do
+    inputdata <- getContents
+    putStrLn $ show $ len $ map (read :: String -> Int) $ lines inputdata
+#+END_SRC
+**** Update List
+#+BEGIN_SRC haskell
+f = map abs
+main = do
+   inputdata <- getContents
+   mapM_ putStrLn $ map show $ f $ map (read :: String -> Int) $ lines inputdata
+#+END_SRC
+**** Evaluating e^x
+#+BEGIN_SRC haskell
+import Control.Applicative
+import Control.Monad
+import System.IO
+
+main :: IO ()
+main = do
+    n_temp <- getLine
+    let n = read n_temp :: Int
+    forM_ [1..n] $ \a0  -> do
+        x_temp <- getLine
+        let x = read x_temp :: Double
+
+getMultipleLines :: Int -> IO [String]
+getMultipleLines n
+    | n <= 0 = return []
+    | otherwise = do          
+        x <- getLine         
+        xs <- getMultipleLines (n-1)    
+        let ret = (x:xs)    
+        return ret 
+#+END_SRC
+**** Functions or not?
+#+BEGIN_SRC haskell
+import Control.Monad
+import Data.Char
+
+allDifferent :: (Eq a) => [a] -> Bool
+allDifferent [] = True
+allDifferent (x:xs) = (notElem x xs) && (allDifferent xs)
+
+isFunction :: (Eq a) => [(a,a)] -> Bool
+isFunction l = allDifferent (map fst l)
+
+main :: IO ()
+main = do
+  contents <- getContents
+  let cases = parse contents
+  let sols = map ((\x -> if x then "YES" else "NO") . isFunction) cases
+  mapM_ putStrLn sols
+  
+parse :: String -> [[(Int,Int)]]
+parse cnt = parseHead $ drop 1 (lines cnt)
+
+parseHead :: [String] -> [[(Int,Int)]]
+parseHead [] = []
+parseHead (x:xs) = parseBody (take n xs) : parseHead (drop n xs)
+  where n = read x
+
+parseBody :: [String] -> [(Int,Int)]
+parseBody = map ((\[a,b] -> (a,b)) . (map read) . words)
+#+END_SRC
+**** Compute the perimeter of a polygon
+#+BEGIN_SRC haskell
+perimeter :: [(Int,Int)] -> Float
+perimeter l = sum $ map distance (pairs l)
+
+pairs :: [a] -> [(a,a)]
+pairs l = zip l (tail l ++ [head l])
+
+distance :: ((Int,Int),(Int,Int)) -> Float
+distance ((x,y),(v,w)) = sqrt . fromIntegral $ (x-v)^2 + (y-w)^2
+
+main :: IO ()
+main = do
+  contents <- getContents
+  let points = parseContents contents
+  let perim = perimeter points
+  print perim
+
+parseContents :: String -> [(Int,Int)]
+parseContents str = map ((\[a,b] -> (a,b)) . (map read) . words) (take (read n) ns)
+  where n:ns = lines str
+#+END_SRC
+**** Compute the area of a polygon
+#+BEGIN_SRC haskell
+area :: [(Int,Int)] -> Float
+area l = (fromIntegral (sum $ map (\((x,y),(v,w)) -> (x*w-y*v)) (pairs l))) * 0.5
+
+pairs :: [a] -> [(a,a)]
+pairs l = zip l (tail l ++ [head l])
+
+main :: IO ()
+main = do
+  contents <- getContents
+  let points = parseContents contents
+  print $ (area points)
+
+parseContents :: String -> [(Int,Int)]
+parseContents str = map ((\[a,b] -> (a,b)) . (map read) . words) (take (read n) ns)
+  where n:ns = lines str
+#+END_SRC
+*** Recursion
+**** Computing the GCD
+#+BEGIN_SRC haskell
+module Main where
+
+gcd' :: Integral a => a -> a -> a
+gcd' a b
+    | (b < a) = gcd'' a b
+    | otherwise = gcd'' b a
+    where
+        gcd'' x 0 = x
+        gcd'' x y = gcd'' y (rem x y)
+
+main = do
+  input <- getLine
+  print . uncurry gcd' . listToTuple . convertToInt . words $ input
+ where
+  listToTuple (x:xs:_) = (x,xs)
+  convertToInt = map (read :: String -> Int)
+#+END_SRC
+**** Fibonacci numbers
+#+BEGIN_SRC haskell
+module Main where
+
+fib :: Int -> Int
+fib n
+    | (n==1) = 0
+    | (n==2) = 1
+    | otherwise = (fib (n-1)) + (fib (n-2))
+
+main = do
+    input <- getLine
+    print . fib . (read :: String -> Int) $ input
+#+END_SRC
+**** Pascal's triangle
+#+BEGIN_SRC haskell
+factorial :: Int -> Int
+factorial 0 = 1
+factorial n = n * (factorial (n-1))
+
+binomial :: Int -> Int -> Int
+binomial n r = quot (factorial n) ((factorial r) * (factorial (n-r)))
+
+pascal :: Int -> [[Int]]
+pascal n = map pascalfile [0..(n-1)]
+  where
+    pascalfile m = map (binomial m) [0..m]
+
+main :: IO ()
+main = do
+  x <- getLine
+  let n = read x :: Int
+  let list = pascal n
+  mapM_ putStrLn (map (unwords . (map show)) list)
+  return ()
+#+END_SRC
+**** String-o-Permute
+#+BEGIN_SRC haskell
+import Control.Monad
+
+permute :: String -> String
+permute []       = []
+permute (a:b:xs) = b:a:(permute xs)
+
+main :: IO ()
+main = do
+  n <- readLn
+  replicateM_ n (do
+                    s <- getLine
+                    putStrLn $ permute s
+                )
+#+END_SRC
+**** String Compression
+#+BEGIN_SRC haskell
+compress :: String -> String
+compress = compressacc (0,'0')
+  where
+    compressacc :: (Int,Char) -> String -> String
+    compressacc (n,x) []
+      | n == 0    = []
+      | n == 1    = [x]
+      | otherwise = x : show n
+    compressacc (n,x) (y:ys)
+      | x == y    = compressacc (succ n,x) ys
+      | otherwise = compressacc (n,x) [] ++ compressacc (1,y) ys
+  
+main :: IO ()
+main = do
+  string <- getLine
+  putStrLn $ compress string
+#+END_SRC
+**** Prefix Compression
+#+BEGIN_SRC haskell
+compression :: String -> String -> (String,String,String)
+compression [] y = ([],[],y)
+compression x [] = ([],x,[])
+compression (x:xs) (y:ys)
+    | x == y    = (x:a,b,c) 
+    | otherwise = ([],x:xs,y:ys)
+  where (a,b,c) = compression xs ys
+
+linelen :: String -> String
+linelen x = show (length x) ++ " " ++ x
+
+main = do x <- getLine
+          y <- getLine
+          let (a,b,c) = compression x y
+          putStrLn $ linelen a
+          putStrLn $ linelen b
+          putStrLn $ linelen c
+#+END_SRC
+**** String Reductions
+#+BEGIN_SRC haskell
+reduction :: Eq a => [a] -> [a]
+reduction []    = []
+reduction (x:xs)
+    | elem x xs = reduction xs
+    | otherwise = x:(reduction xs)
+
+main :: IO ()
+main = do x <- getLine
+          putStr $ reverse (reduction (reverse x))
+#+END_SRC
+**** The Sums of Powers
+#+BEGIN_SRC haskell
+forms :: [Int] -> Int -> Int
+forms _  0 = 1
+forms [] _ = 0
+forms (x:xs) g
+  | g < x     = 0
+  | otherwise = (forms xs g) + (forms xs (g-x))
+
+sumpowers :: Int -> Int -> Int
+sumpowers n e = forms (map (^e) [1..]) n
+
+main :: IO ()
+main = do
+  n <- readLn :: IO Int
+  e <- readLn :: IO Int
+  putStrLn . show $ sumpowers n e
+#+END_SRC
+**** Super-Queens on a chessboard
+#+BEGIN_SRC haskell
+import Control.Monad
+import Control.Applicative ((<$>))
+import Data.Sequence as Seq
+
+attack :: (Int,Int) -> (Int,Int) -> Bool
+attack (xa,ya) (xb,yb)
+  | ((abs (xa-xb) <= 2) && (abs (ya-yb) <= 2)) = True
+  | (abs (xa-xb)) == (abs (ya-yb)) = True
+  | otherwise = False
+
+putQueen :: Int -> [(Int,Int)] -> Seq Bool -> Int -> Int
+putQueen n prevqueens columns row = if n == row then 1 else sum $ do
+  c <- [0..(n-1)]
+  guard $ not $ index columns c
+  guard $ not $ any (attack (row,c)) prevqueens
+  return $ putQueen n ((row,c):prevqueens) (update c True columns) (succ row)
+
+queens :: Int -> Int
+queens n = putQueen n [] (Seq.replicate n False) 0
+
+main :: IO ()
+main = queens <$> readLn >>= print
+#+END_SRC
+**** Sequence full of colors
+#+BEGIN_SRC haskell
+import Control.Monad
+
+fullcolorrec :: Int -> Int -> String -> Bool
+fullcolorrec rg yb []       = (rg == 0) && (yb == 0)
+fullcolorrec rg yb ('R':xs) = (rg <  1) && (fullcolorrec (rg+1) yb xs)
+fullcolorrec rg yb ('G':xs) = (rg > -1) && (fullcolorrec (rg-1) yb xs)
+fullcolorrec rg yb ('Y':xs) = (yb <  1) && (fullcolorrec rg (yb+1) xs)
+fullcolorrec rg yb ('B':xs) = (yb > -1) && (fullcolorrec rg (yb-1) xs)
+
+
+fullcolor :: String -> Bool
+fullcolor = fullcolorrec 0 0 
+
+main :: IO ()
+main = do
+  cases <- readLn
+  replicateM_ cases (
+    do
+      chain <- getLine
+      putStrLn . show $ fullcolor chain
+    )
+#+END_SRC
+**** Filter Elements
+#+BEGIN_SRC haskell
+import Data.Map 
+import Data.List
+import Control.Monad
+
+-- Counter
+type Counter = Map Int Int
+
+toCounter :: [Int] -> Counter
+toCounter = Prelude.foldl add empty
+
+add :: Counter -> Int -> Counter
+add l x = insertWith (+) x 1 l
+  
+
+-- Filter
+filterk :: [Int] -> Int -> [Int]
+filterk l k = Data.List.nub $ Data.List.filter ((flip elem) (keys $ Data.Map.filter (>=k) (toCounter l))) l
+
+showFilter :: [Int] -> String
+showFilter [] = "-1"
+showFilter xs = intercalate " " $ Data.List.map show xs
+
+main = do
+  cases <- readLn
+  replicateM_ cases (
+    do
+      (n,k) <- fmap (\[a,b] -> (a,b)) $ fmap ((Data.List.map read) . words) getLine
+      list <- fmap ((Data.List.map read) . words) getLine
+      let filteredlist = filterk list k
+      putStrLn $ showFilter filteredlist
+    )
+#+END_SRC

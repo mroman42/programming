@@ -547,3 +547,509 @@ main = do
       putStrLn $ showFilter filteredlist
     )
 #+END_SRC
+*** Functional Structures
+**** Valid BST
+#+BEGIN_SRC haskell
+import Control.Monad
+
+data BinTree a = Empty
+               | Node a (BinTree a) (BinTree a)
+
+insert :: (Ord a) => BinTree a -> a -> BinTree a
+insert Empty x = Node x Empty Empty
+insert (Node n lt rt) x
+       | x > n = Node n lt (insert rt x)
+       | x < n = Node n (insert lt x) rt
+
+preorder :: BinTree a -> [a]
+preorder Empty = []
+preorder (Node n lt rt) = [n] ++ preorder lt ++ preorder rt
+
+main :: IO ()
+main = do cases <- readLn :: IO Int
+          replicateM_ cases handleCase
+
+handleCase :: IO ()
+handleCase = do n <- readLn :: IO Int
+                s <- getLine
+                -- Reads tree
+                let list = map read $ (words s) :: [Int]
+                let tree = foldl insert Empty list
+                let nlist = preorder tree
+                -- Compares
+                case (list == nlist) of
+                  True -> putStrLn "YES"
+                  False -> putStrLn "NO"
+#+END_SRC
+**** Lists and GCD
+#+BEGIN_SRC haskell
+import Control.Monad
+import Data.List (intercalate)
+
+gcdlist :: [[(Int,Int)]] -> [(Int,Int)]
+gcdlist xs = foldr gcdtwo (head xs) xs
+
+gcdtwo :: [(Int,Int)] -> [(Int,Int)] -> [(Int,Int)]
+gcdtwo [] _  = []
+gcdtwo _  [] = []
+gcdtwo ((x,n):xs) ((y,m):ys)
+  | (x == y) = (x, min n m):(gcdtwo xs ys)
+  | (x <  y) = gcdtwo xs ((y,m):ys)
+  | (x >  y) = gcdtwo ((x,n):xs) ys
+
+pairs :: [a] -> [(a,a)]
+pairs []       = []
+pairs (x:y:xs) = (x,y):(pairs xs)
+
+showPair :: (Show a) => (a,a) -> String
+showPair (x,y) = (show x) ++ " " ++ (show y) 
+
+main :: IO ()
+main = do
+  cases <- readLn :: IO Int
+  lists <- replicateM cases (fmap (pairs . (map read) . words) getLine)
+  putStrLn $ intercalate " " $ map showPair $ gcdlist lists
+#+END_SRC
+**** Tree Manager
+#+BEGIN_SRC haskell
+import Control.Monad
+import Control.Monad.Writer
+import Data.Sequence (Seq, singleton)
+import Data.Foldable (sequence_)
+
+data Tree a = Node a [Tree a]
+data Trail a = Trail (a, [Tree a], [Tree a])
+type ZipTree a = (Tree a, [Trail a])
+
+change :: a -> ZipTree a -> ZipTree a
+change x (Node y xs, t) = (Node x xs, t)
+
+get :: ZipTree a -> a
+get (Node x xs, t) = x
+
+visitLeft :: ZipTree a -> ZipTree a
+visitLeft (t, Trail (p, l:ls, rs) : ts) = (l, Trail (p, ls, t:rs) : ts)
+
+visitRight :: ZipTree a -> ZipTree a
+visitRight (t, Trail (p, ls, r:rs) : ts) = (r, Trail (p, t:ls, rs) : ts)
+
+visitParent :: ZipTree a -> ZipTree a
+visitParent (t, Trail (p, ls, rs) : ts) = (Node p ((reverse ls) ++ [t] ++ rs), ts)
+
+visitChild :: Int -> ZipTree a -> ZipTree a
+visitChild n (Node y (x:xs), p) = rightntimes (x, (Trail (y, [], xs)):p)
+  where
+    rightntimes = (foldr (.) id (replicate (n-1) visitRight))
+
+insertLeft :: a -> ZipTree a -> ZipTree a
+insertLeft  l (t, Trail (p, ls, rs) : ts) = (t, Trail (p, (Node l []):ls, rs) : ts)
+
+insertRight :: a -> ZipTree a -> ZipTree a
+insertRight r (t, Trail (p, ls, rs) : ts) = (t, Trail (p, ls, (Node r []):rs) : ts)
+
+insertChild :: a -> ZipTree a -> ZipTree a
+insertChild c (Node x xs, ts) = (Node x ((Node c []):xs), ts)
+
+delete :: ZipTree a -> ZipTree a
+delete (_, Trail (p, ls, rs) : ts) = (Node p ((reverse ls) ++ rs), ts)
+
+printTree :: (Show a) => ZipTree a -> Writer (Seq String) (ZipTree a)
+printTree zt@(Node x _,_) = writer (zt, singleton (show x))
+
+readOperation :: (Read a, Show a) => [String] -> (ZipTree a -> Writer (Seq String) (ZipTree a))
+readOperation s = case s of
+  ["change", x]         -> fmap return $ change (read x)
+  ["print"]             -> printTree
+  ["visit","left"]      -> fmap return $ visitLeft
+  ["visit","right"]     -> fmap return $ visitRight
+  ["visit","parent"]    -> fmap return $ visitParent
+  ["visit","child", n]  -> fmap return $ visitChild (read n)
+  ["insert","left", x]  -> fmap return $ insertLeft (read x)
+  ["insert","right", x] -> fmap return $ insertRight (read x)
+  ["insert","child", x] -> fmap return $ insertChild (read x)
+  ["delete"]            -> fmap return $ delete
+  _                     -> error "Invalid expression"
+
+startTree :: ZipTree Int
+startTree = (Node 0 [], [])
+
+
+main = do
+  n <- readLn :: IO Int
+  operations <- replicateM n (fmap (readOperation . words) getLine)
+  let (a,w) = runWriter $ foldl (>>=) (return startTree) operations
+  Data.Foldable.sequence_ $ fmap putStrLn w
+#+END_SRC
+**** Fighting Armies
+#+BEGIN_SRC haskell
+import Data.Sequence as Seq
+import Data.Foldable
+import Data.Vector.Mutable as Vect (replicate,unsafeRead,unsafeWrite,modify,unsafeModify,MVector)
+import Control.Monad
+import Control.Monad.Primitive
+import qualified Data.ByteString.Lazy.Char8 as DB
+
+data BinomialTree a = Nil | Node a (Seq (BinomialTree a))
+  deriving (Show)
+type BinomialHeap a = [BinomialTree a]
+
+singleton :: a -> BinomialTree a
+singleton x = Node x empty
+
+singleHeap :: a -> BinomialHeap a
+singleHeap x = [Main.singleton x]
+
+sumTree :: (Ord a) => BinomialTree a -> BinomialTree a -> (BinomialTree a, BinomialTree a)
+sumTree x   Nil = (x,Nil)
+sumTree Nil y   = (y,Nil)
+sumTree (Node x xs) (Node y ys)
+  | x >= y    = (Nil,Node x (xs |> Node y ys))
+  | otherwise = (Nil,Node y (ys |> Node x xs))
+
+sumTrees :: (Ord a) => BinomialTree a
+         -> BinomialTree a
+         -> BinomialTree a
+         -> (BinomialTree a, BinomialTree a)
+sumTrees t x Nil = sumTree t x
+sumTrees t Nil y = sumTree t y
+sumTrees Nil x y = sumTree x y
+sumTrees t x y   = (txy,rr)
+  where (xy,r)   = sumTree x y
+        (txy,rt) = sumTree xy t
+        (rr,_)   = sumTree r rt
+
+sumHeaps :: (Ord a) => BinomialTree a -> BinomialHeap a -> BinomialHeap a -> BinomialHeap a
+sumHeaps Nil [] []     = []
+sumHeaps Nil [x] (Nil:ys) = x:ys
+sumHeaps Nil (x:xs) [] = x:xs
+sumHeaps Nil [] (y:ys) = y:ys
+sumHeaps t []     []     = [t]
+sumHeaps t (x:xs) []     = tx:sumHeaps r xs []
+  where (tx, r) = sumTree t x
+sumHeaps t []     (y:ys) = ty:sumHeaps r [] ys
+  where (ty, r) = sumTree t y
+sumHeaps t (x:xs) (y:ys) = txy:sumHeaps r xs ys
+  where (txy, r) = sumTrees t x y
+
+
+
+
+merge :: (Ord a) => BinomialHeap a -> BinomialHeap a -> BinomialHeap a
+merge = sumHeaps Nil
+
+insert :: (Ord a) => a -> BinomialHeap a -> BinomialHeap a
+insert x = merge (singleHeap x)
+
+findMin :: BinomialHeap Int -> Int
+findMin h = Prelude.foldr max 0 $ fs h
+  where
+    fs []            = []
+    fs (Nil:xs)      = fs xs
+    fs (Node x _:xs) = x:fs xs
+
+deleteMinTree :: (Ord a) => a -> BinomialHeap a -> (BinomialHeap a, BinomialHeap a)
+deleteMinTree _ []               = ([],[])
+deleteMinTree m (Nil:xs)         = (Nil:fst (deleteMinTree m xs),snd $ deleteMinTree m xs)
+deleteMinTree m (Node x ts:xs)
+  | x == m    = (Nil:fst (deleteMinTree m xs), toList ts)
+  | otherwise = (Node x ts:fst (deleteMinTree m xs), snd $ deleteMinTree m xs)
+
+deleteMin :: BinomialHeap Int -> BinomialHeap Int
+deleteMin h = merge hm mint
+  where (hm, mint) = deleteMinTree (findMin h) h
+
+
+
+
+main :: IO ()
+main = do
+  [narmies, _] <- fmap (map read . words) getLine :: IO [Int]
+  army <- Vect.replicate (succ narmies) []
+  contents <- fmap DB.lines DB.getContents
+  Control.Monad.forM_ contents (\line ->
+    do
+      let order = map readbs . DB.words $ line
+      case order of
+        [1,i] -> do
+          arm <- Vect.unsafeRead army i
+          print $ findMin arm
+        [2,i] ->
+          Vect.unsafeModify army deleteMin i
+        [3,i,c] ->
+          Vect.unsafeModify army (insert c) i
+        [4,i,j] -> do
+          armj <- Vect.unsafeRead army j
+          Vect.unsafeModify army (merge armj) i
+    )
+  return ()
+
+readbs :: DB.ByteString -> Int
+readbs n = case DB.readInt n of
+  Nothing -> undefined
+  Just (m,_) -> m
+#+END_SRC
+*** Memoization and DP
+**** Number of Binary Search Tree
+#+BEGIN_SRC haskell
+import Control.Monad
+
+(*.),(+.) :: Int -> Int -> Int
+(*.) = (\a b -> (a*b) `mod` 100000007)
+(+.) = (\a b -> (a+b) `mod` 100000007)
+
+bin :: [Int]
+bin = 1 : do
+  n <- [1..]
+  return $ foldr (+.) 0 $ do
+    c <- [0..(n-1)]
+    return $ (bin !! c) *. (bin !! (n-1-c))
+
+main :: IO ()
+main = do
+  cases <- readLn :: IO Int
+  replicateM_ cases (
+    do
+      n <- readLn
+      print $ bin !! n
+    )
+#+END_SRC
+**** Pentagonal Numbers
+#+BEGIN_SRC haskell
+import Control.Monad
+
+pentagonals = 0 : zipWith (+) pentagonals (map ((+1) . (*3)) [0..])
+pentagonal n = quot (n*(3*n-1)) 2
+
+main = do
+  n <- readLn
+  replicateM_ n (
+    do
+      m <- readLn
+      print $ pentagonal m
+    )
+#+END_SRC
+**** Fibonacci
+#+BEGIN_SRC haskell
+import Control.Monad
+
+modulo = 100000000 + 7
+(+.) = \x -> \y -> mod (x+y) modulo
+fibonacci = [0,1] ++ (zipWith (+.) fibonacci (tail fibonacci))
+fib = (fibonacci !!)
+
+main = do
+  cases <- readLn
+  replicateM_ cases (do
+                        n <- readLn
+                        print $ fib n
+                    )
+#+END_SRC
+**** Expressions
+#+BEGIN_SRC haskell
+import Control.Monad
+import Data.Sequence (Seq,singleton)
+import Data.Foldable (toList)
+import Data.Monoid
+
+(+.) a b = mod (a+b) 101
+(*.) a b = mod (a*b) 101
+(-.) a b = mod (a-b) 101
+
+operation :: (Int,Seq String) -> Int -> [(Int,Seq String)]
+operation (n,s) x = [ (n *. x,mappend s $ singleton ("*"++show x)),
+                      (n -. x,mappend s $ singleton ("-"++show x)),
+                      (n +. x,mappend s $ singleton ("+"++show x))
+                    ]
+
+solution :: [Int] -> String
+solution (x:xs) = concat . toList $
+  snd . head $ filter ((==0) . fst) $ foldM operation (x,singleton (show x)) xs
+
+main :: IO ()
+main = do
+  n <- readLn :: (IO Int)
+  nms <- fmap ((fmap read) . words) getLine :: (IO [Int])
+  putStrLn $ solution nms
+#+END_SRC
+*** Ad Hoc
+**** Jumping Bunnies
+#+BEGIN_SRC haskell
+import Control.Monad
+
+jumps :: (Integral a) => [a] -> a
+jumps = foldr lcm 1
+
+main :: IO ()
+main = do
+  n <- readLn :: IO Int
+  bunnies <- (fmap ((map read) . words) getLine) :: IO [Int]
+  print $ jumps bunnies
+#+END_SRC
+**** Rotate String
+#+BEGIN_SRC haskell
+import Data.List
+
+rotations :: String -> [String]
+rotations s = tail $ zipWith (++) (tails s) (inits s)
+
+main = do
+  strings <- input
+  let output = map ((intercalate " ") . rotations) strings
+  mapM_ putStrLn output
+  
+input :: IO [String]
+input = do
+  n <- readLn :: IO Int
+  sequence $ map (\i -> getLine) [1..n]
+#+END_SRC
+**** Remove Duplicates
+#+BEGIN_SRC haskell
+import Data.Char
+import Data.Bits
+
+type Bit32 = Int
+
+indexChar :: Char -> Int
+indexChar c = (ord c) - (ord 'a')
+
+isChar :: Bit32 -> Char -> Bool
+isChar a c = testBit a (indexChar c)
+
+setChar :: Bit32 -> Char -> Bit32
+setChar a c = setBit a (indexChar c)
+
+
+duplicates :: String -> String
+duplicates xs = duplicates' 0 xs
+
+duplicates' :: Bit32 -> String -> String
+duplicates' _ []     = []
+duplicates' b (x:xs)
+  | (isChar b x)  = duplicates' b xs
+  | otherwise     = x : (duplicates' (setChar b x) xs)
+
+main = do
+  string <- getLine
+  putStrLn (duplicates string)
+#+END_SRC
+**** Huge GCD
+#+BEGIN_SRC haskell
+(*.) a b = mod (a*b) 1000000007
+
+hugegcd :: [Int] -> [Int] -> Int
+hugegcd as bs = fst $ foldr gcdr (1,bs) as
+  where
+    gcdr :: Int -> (Int,[Int]) -> (Int,[Int])
+    gcdr a (g,br) = (g *. ng, nbr)
+      where
+        (ng,nbr) = gcda a br
+
+gcda :: Int -> [Int] -> (Int,[Int])
+gcda a []     = (1,[])
+gcda a (b:bs) = (d *. g, (quot b d):ls)
+  where
+    d      = gcd a b
+    (g,ls) = gcda (quot a d) bs
+
+
+main = do
+  a <- readLn :: IO Int
+  lista <- fmap ((map read) . words) getLine
+  b <- readLn :: IO Int
+  listb <- fmap ((map read) . words) getLine
+  putStrLn . show $ hugegcd lista listb
+#+END_SRC
+**** Missing Numbers (FP)
+#+BEGIN_SRC haskell
+import Prelude hiding (replicate, zipWith)
+import Data.List hiding (replicate, zipWith)
+import Data.Sequence
+
+counter :: [Int] -> Seq Int
+counter = foldr (adjust (+1)) (replicate 110 0) 
+
+difference :: [Int] -> [Int] -> [Int]
+difference as bs = map (+minb) $ findIndicesL (>0) $ zipWith (-) (counter bms) (counter ams)
+  where
+    minb = minimum bs
+    ams  = map ((flip (-)) minb) as
+    bms  = map ((flip (-)) minb) bs 
+
+main :: IO ()
+main = do
+  na <- readLn :: IO Int
+  anumbers <- fmap (map read . words) getLine
+  nb <- readLn :: IO Int
+  bnumbers <- fmap (map read . words) getLine
+  putStrLn . (intercalate " ") . (map show) $ difference anumbers bnumbers
+#+END_SRC
+**** Common divisors
+#+BEGIN_SRC haskell
+import Data.List
+import Control.Monad
+import Control.Arrow
+
+factors :: Int -> [Int]
+factors n = fact 2 n
+  where
+    fact d n
+      | d > n          = []
+      | (mod n d == 0) = d : fact d (quot n d)
+      | otherwise      = fact (succ d) n
+
+primefactors :: Int -> [(Int,Int)]
+primefactors n = (map (head &&& length)) . group $ (factors n)
+
+divisors :: Int -> Int
+divisors n = product $ map ((+1) . snd) (primefactors n)
+
+commondivisors :: Int -> Int -> Int
+commondivisors x y = divisors $ gcd x y
+
+main = do
+  n <- readLn :: IO Int
+  replicateM_ n (
+    do
+      (a,b) <- fmap ((\[x,y] -> (x,y)) . (map read) . words) getLine
+      putStrLn . show $ commondivisors a b
+    )
+#+END_SRC
+**** Captain Prime
+#+BEGIN_SRC haskell
+import Data.List
+
+primes :: [Int]
+primes = 2 : filter isPrime [3,5..]
+
+isPrime :: Int -> Bool
+isPrime x = (x>1) && (all (\n -> x `mod` n /= 0) $
+            takeWhile (\n -> n * n <= x) primes)
+
+leftReminders :: Int -> [Int]
+leftReminders n = map read $ init $ tails (show n)
+
+rightReminders :: Int -> [Int]
+rightReminders 0 = []
+rightReminders n = n : rightReminders (quot n 10)
+
+haszero :: Int -> Bool
+haszero n = elem '0' (show n)
+
+fate :: Int -> String
+fate n
+  | haszero n     = "DEAD"
+  | left && right = "CENTRAL"
+  | left          = "LEFT"
+  | right         = "RIGHT"
+  | otherwise     = "DEAD"
+  where
+    left  = and (map isPrime $ leftReminders n)
+    right = and (map isPrime $ rightReminders n)
+
+main :: IO ()
+main = do
+  cases <- readLn 
+  numbers <- mapM (\i -> readLn) [1..cases]
+  let strings = map fate numbers
+  mapM_ putStrLn strings
+#+END_SRC

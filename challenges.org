@@ -1114,7 +1114,8 @@ is that if you put two pointers into a cycle of length $n$ separated by a
 distance of $a$ and move them, one at a speed of $1$ and the other at a 
 speed of $2$; they will eventually collide after $a$ steps.
 
-\[ a + n \\]
+\[ a + n \equiv 2n \]
+\[a \equiv n\]
 \[\]
 #+BEGIN_SRC c++
 bool has_cycle(Node* head) {

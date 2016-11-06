@@ -1053,3 +1053,196 @@ main = do
   let strings = map fate numbers
   mapM_ putStrLn strings
 #+END_SRC
+** Cracking the code interview
+*** Data Structures
+**** Arrays: Left Rotation
+***** C++ version
+#+BEGIN_SRC c++
+  #include <vector>
+  #include <iostream>
+  using namespace std;
+
+  vector<int> array_left_rotation(vector<int> a, int n, int k) {
+      vector<int> result;
+      for (int i=0; i<a.size(); i++)
+          result.push_back(a[(i+k)%n]);
+      return result;
+  }
+
+  int main(){
+      int n;
+      int k;
+      cin >> n >> k;
+      vector<int> a(n);
+      for(int a_i = 0;a_i < n;a_i++){
+          cin >> a[a_i];
+      }
+      vector<int> output = array_left_rotation(a, n, k);
+      for(int i = 0; i < n;i++)
+          cout << output[i] << " ";
+      cout << endl;
+      return 0;
+  }
+#+END_SRC
+
+***** Haskell version
+We are using a list in Haskell instead of an array.
+Time complexity is the same, anyway. Using Data.Sequence
+would not lead us to a better complexity.
+
+#+BEGIN_SRC haskell
+  import Control.Applicative
+  import Data.List
+
+  rotate :: Int -> [a] -> [a]
+  rotate k xs = take (length xs) $ drop k (cycle xs)
+
+  main :: IO ()
+  main = do
+    -- Input
+    nt <- words <$> getLine
+    let t = read $ nt!!1 :: Int
+    larray <- (map read) . words <$> getLine
+    -- Output
+    let result = rotate t larray :: [Int]
+    putStrLn (concat $ intersperse " " (map show result))
+#+END_SRC
+
+**** Linked Lists: Detect a cycle
+This solution uses two *fast and slow* pointers. The main idea
+is that if you put two pointers into a cycle of length $n$ separated by a
+distance of $a$ and move them, one at a speed of $1$ and the other at a 
+speed of $2$; they will eventually collide after $a$ steps.
+
+\[ a + n \\]
+\[\]
+#+BEGIN_SRC c++
+bool has_cycle(Node* head) {
+    Node* slow = head;
+    Node* fast = head;
+    while ((slow != nullptr) and (fast != nullptr) and (fast->next != nullptr)) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast)
+            return true;
+    }
+        
+    return false;
+}
+#+END_SRC
+
+**** Stacks: Balanced Brackets
+#+BEGIN_SRC c++
+  #include<iostream>
+  #include<stack>
+  using namespace std;
+
+  bool is_balanced(string expression) {
+    stack<char> brackets;
+ 
+    for (char current : expression) {     
+        if (current == '{' or current == '(' or current == '[')
+            brackets.push(current);
+        else if (not brackets.empty() and
+                  (((current == '}') and (brackets.top() == '{')) or
+                  ((current == ')') and (brackets.top() == '(')) or
+                  ((current == ']') and (brackets.top() == '[')))
+                )
+                brackets.pop();
+            else
+                return false;
+        }
+   
+    // It has to be empty!
+    return brackets.empty();
+  }
+
+  int main(){
+      int t;
+      cin >> t;
+      for(int a0 = 0; a0 < t; a0++){
+          string expression;
+          cin >> expression;
+          bool answer = is_balanced(expression);
+          if(answer)
+              cout << "YES\n";
+          else cout << "NO\n";
+      }
+      return 0;
+  }
+#+END_SRC
+**** Queues: A tale of two stacks
+#+BEGIN_SRC c++
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <stack>
+#include <queue>
+using namespace std;
+
+class MyQueue {
+  
+    public:
+        stack<int> stack_newest_on_top, stack_oldest_on_top;   
+        void push(int x) {
+            stack_newest_on_top.push(x);
+        }
+
+        void pop() {
+            if (stack_oldest_on_top.empty())
+                refill();
+            stack_oldest_on_top.pop();
+        }
+
+        int front() {
+            if (stack_oldest_on_top.empty())
+                refill();
+            return stack_oldest_on_top.top();
+        }
+    
+        void refill() {
+            while(not stack_newest_on_top.empty()) {
+                stack_oldest_on_top.push(stack_newest_on_top.top());
+                stack_newest_on_top.pop();
+            }
+        }
+};
+
+int main() {
+    MyQueue q1;
+    int q, type, x;
+    cin >> q;
+    
+    for(int i = 0; i < q; i++) {
+        cin >> type;
+        if(type == 1) {
+            cin >> x;
+            q1.push(x);
+        }
+        else if(type == 2) {
+            q1.pop();
+        }
+        else cout << q1.front() << endl;
+    }
+
+    return 0;
+}
+#+END_SRC
+**** Trees: Is this a binary search tree?
+#+BEGIN_SRC c++
+  bool checkBST(Node* root) {
+      return checkBSTBounds(root,-1,-1);
+  }
+
+  bool checkBSTBounds(Node* root, int lower, int upper) {
+      if (!root)
+          return true;
+   
+      int data = root->data;
+      return ((upper == -1 or data < upper) and (lower == -1 or data > lower)) and
+             checkBSTBounds(root->left, lower, data) and
+             checkBSTBounds(root->right, data, upper);
+  }
+#+END_SRC

@@ -1311,7 +1311,8 @@ int main() {
 #+END_SRC
 *** Techniques
 **** Recursion: Fibonacci numbers
-I won't use recursion directly as I want to write a ${\cal O}(log(n))$ solution using matrices.
+We *won't use recursion* directly as I want to write a ${\cal O}(log(n))$ solution using matrices.
+It uses bit manipulation in order to get the binary decomposition of the input.
 #+BEGIN_SRC c++
   #include<vector>
   #include<iostream>
@@ -1350,5 +1351,58 @@ I won't use recursion directly as I want to write a ${\cal O}(log(n))$ solution 
     }
 
     cout << result[1] << endl;
+  }
+#+END_SRC
+**** Bit manipulation: Lonely integer
+Folds using =xor=. Every element will be cancelled out with its pair,
+except for the result.
+#+BEGIN_SRC c++
+#include <vector>
+#include <iostream>
+using namespace std;
+
+int lonely_integer(vector < int > a) {
+    int result = 0;
+    for (int i=0; i<a.size(); i++)
+        result ^= a[i];
+    return result;
+}
+
+int main(){
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for(int a_i = 0;a_i < n;a_i++){
+       cin >> a[a_i];
+    }
+    cout << lonely_integer(a) << endl;
+    return 0;
+}
+#+END_SRC
+**** Time complexity: Primality
+#+BEGIN_SRC c++
+  #include<iostream>
+  #include<cmath>
+  using namespace std;
+
+  int main() {
+    int cases; cin >> cases;
+    for (int i=0; i<cases; i++) {
+      int input; cin >> input;
+      bool is_prime = true;
+
+      if (not (input > 1))
+        is_prime = false;
+    
+      // Primality checker
+      int root = (int) sqrt(input)+1;
+      for (int i=2; i<root and is_prime; i++)
+        is_prime = (input % i != 0);
+
+      if (is_prime)
+        cout << "Prime" << endl;
+      else
+        cout << "Not prime" << endl;
+    }
   }
 #+END_SRC

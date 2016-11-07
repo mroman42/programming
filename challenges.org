@@ -1247,3 +1247,65 @@ int main() {
              checkBSTBounds(root->right, data, upper);
   }
 #+END_SRC
+**** Heaps: Find the running median
+#+BEGIN_SRC c++
+  #include<vector>
+  #include<algorithm>
+  #include<iostream>
+  #include<iomanip>
+
+  using namespace std;
+
+  int main() {
+    cout << fixed << setprecision(1);
+    vector<int> left_heap;
+    vector<int> right_heap;
+    float median;
+
+    // Reads first case
+    unsigned cases;
+    cin >> cases;
+    cin >> median;
+    left_heap.push_back(median);
+    push_heap(left_heap.begin(), left_heap.end(), greater<int>());
+    cout << median << endl;
+
+    for (unsigned i=1; i<cases; i++) {
+      // Inserts new value
+      int new_value; cin >> new_value;
+      if (new_value > median) {
+        right_heap.push_back(new_value);
+        push_heap(right_heap.begin(), right_heap.end(), greater<int>());
+      }
+      else {
+        left_heap.push_back(new_value);
+        push_heap(left_heap.begin(), left_heap.end(), less<int>());
+      }
+
+      // Rebalances both heaps
+      if (right_heap.size() > left_heap.size()) {
+        int moving = right_heap[0];
+        pop_heap(right_heap.begin(), right_heap.end(), greater<int>());
+        right_heap.pop_back();
+
+        left_heap.push_back(moving);
+        push_heap(left_heap.begin(), left_heap.end(), less<int>());
+      }
+      if (left_heap.size() > right_heap.size()+1) {
+        int moving = left_heap[0];
+        pop_heap(left_heap.begin(), left_heap.end(), less<int>());
+        left_heap.pop_back();
+
+        right_heap.push_back(moving);
+        push_heap(right_heap.begin(), right_heap.end(), greater<int>());
+      }
+
+      // Prints median
+      if (i%2 != 0)
+        median = (left_heap[0]+right_heap[0])/2.0;
+      else
+        median = left_heap[0];
+      cout << median << endl;
+    }
+  }
+#+END_SRC

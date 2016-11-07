@@ -1309,3 +1309,46 @@ int main() {
     }
   }
 #+END_SRC
+*** Techniques
+**** Recursion: Fibonacci numbers
+I won't use recursion directly as I want to write a ${\cal O}(log(n))$ solution using matrices.
+#+BEGIN_SRC c++
+  #include<vector>
+  #include<iostream>
+  using namespace std;
+
+  typedef vector<int> Matrix;
+
+  Matrix product(Matrix& a, Matrix& b) {
+    Matrix prod;
+    prod[0] = a[0]*b[0]+a[1]*b[2];
+    prod[1] = a[0]*b[1]+a[1]*b[3];
+    prod[2] = a[2]*b[0]+a[3]*b[2];
+    prod[3] = a[2]*b[1]+a[3]*b[3];
+    return prod;
+  }
+
+  int main() {
+    int input; cin >> input;
+    Matrix fib;
+    fib.push_back(1);
+    fib.push_back(1);
+    fib.push_back(1);
+    fib.push_back(0);
+    Matrix result;
+    result.push_back(1);
+    result.push_back(0);
+    result.push_back(0);
+    result.push_back(1);
+
+    while (input) {
+      if (input & 1)
+        result = product(result,fib);
+
+      fib = product(fib,fib);
+      input = (input >> 1);
+    }
+
+    cout << result[1] << endl;
+  }
+#+END_SRC

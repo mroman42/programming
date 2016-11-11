@@ -1,6 +1,220 @@
 #+TITLE: Programming Challenges
 #+AUTHOR: Mario Román
 
+* Algorithms
+** Sorting
+*** Bubble sort
+An average performance of ${\cal O}(n^2)$.
+
+**** C++ Implementation
+#+BEGIN_SRC cpp :cmdline <<< '9 5 7 3 6 2 8 4 1'
+  #include<iostream>
+  #include<vector>
+  using namespace std;
+
+  void bubblesort(vector<int>& arr) {
+    for (unsigned i=0; i<arr.size(); i++) {
+      for (unsigned j=0; j<arr.size()-i-1; j++) {
+        if (arr[j] > arr[j+1]) {
+          int swap = arr[j];
+          arr[j] = arr[j+1];
+          arr[j+1] = swap;
+        }
+      }
+    }
+  }
+
+
+  int main() {
+    vector<int> numbers;
+    int read;
+
+    while (cin >> read) {
+      numbers.push_back(read);
+    }
+
+    bubblesort(numbers);
+
+    for (int n : numbers) {
+      cout << n << " ";
+    }
+  }
+#+END_SRC
+
+#+RESULTS:
+: 1 2 3 4 5 6 7 8 9
+
+*** Quicksort
+An average performance of ${\cal O}(n \log(n))$, but the worst-case performance is of ${\cal O}(n^2)$.
+
+**** C++ Implementation
+#+BEGIN_SRC cpp :cmdline <<< '9 5 7 3 6 2 8 4 1'
+  #include<iostream>
+  #include<vector>
+  using namespace std;
+
+  void quicksort(vector<int>& numbers, int left, int right) {
+    if (left >= right)
+      return;
+
+    int i = left+1;
+    int j = right;
+    int pivot = numbers[left];
+
+    while (i <= j) {
+      while (numbers[i] < pivot)
+        i++;
+      while (numbers[j] > pivot)
+        j--;
+      if (i < j) {
+        int swap = numbers[i];
+        numbers[i] = numbers[j];
+        numbers[j] = swap;
+      }
+    }
+
+    numbers[left] = numbers[j];
+    numbers[j] = pivot;
+    quicksort(numbers, left, j-1);
+    quicksort(numbers, j+1, right);
+  }
+
+  int main() {
+    int read;
+    vector<int> numbers;
+    while (cin >> read)
+      numbers.push_back(read);
+
+    quicksort(numbers,0,numbers.size()-1);
+
+    for (int n : numbers)
+      cout << n << " ";
+  }
+#+END_SRC
+
+#+RESULTS:
+: 1 2 3 4 5 6 7 8 9
+
+**** Haskell Implementation
+#+BEGIN_SRC haskell :results output
+  input :: [Int]
+  input = [9,5,8,3,7,4,1,2,6]
+
+  quicksort :: (Ord a) => [a] -> [a]
+  quicksort [] = []
+  quicksort (x:xs) =
+    quicksort (filter (<=x) xs) ++
+    [x] ++
+    quicksort (filter (>=x) xs)
+
+  main :: IO ()
+  main = do
+    print $ quicksort input
+#+END_SRC
+
+#+RESULTS:
+: [1,2,3,4,5,6,7,8,9]
+
+*** Mergesort
+**** C++ Implementation
+Mergesort has an average performance of ${\cal O}(n \log(n))$, where $n$ is the size of the arrray.
+We can compute that visualizing a diagram of mergesort. To merge a level into other is lineal
+in time, and to sort a level depends on the numbers of levels below it; if we think of the
+diagram as a tree, it has $\log(n)$ levels.
+#+BEGIN_SRC cpp :cmdline <<< '8 6 2 4 7 1 5 9 3'
+  #include<iostream>
+  #include<vector>
+  using namespace std;
+
+  void merge(vector<int>& arr, int left, int middle, int right) {
+    vector<int> auxiliar;
+    for (int i=left; i<right; i++)
+      auxiliar.push_back(arr[i]);
+
+    int rel_left = left-left;
+    int rel_right = right-left;
+    int rel_middle = middle-left;
+    int i = rel_left;
+    int j = rel_middle;
+    int a = left;
+
+    while (i < rel_middle and j < rel_right) {
+      if (auxiliar[i] < auxiliar[j]) {
+        arr[a] = auxiliar[i];
+        i++; a++;
+      }
+      else {
+        arr[a] = auxiliar[j];
+        j++; a++;
+      }
+    }
+
+    while (i < rel_middle) {
+      arr[a] = auxiliar[i];
+      i++; a++;
+    }
+
+    while (j < rel_right) {
+      arr[a] = auxiliar[j];
+      j++; a++;
+    }
+  }
+
+  void mergesort(vector<int>& arr, int left, int right) {
+    if (left >= right-1)
+      return;
+
+    int middle = (left+right)/2;
+    mergesort(arr, left, middle);
+    mergesort(arr, middle, right);
+    merge(arr, left, middle, right);
+  }
+
+  int main() {
+    vector<int> numbers;
+    int read;
+    while (cin >> read)
+      numbers.push_back(read);
+
+    mergesort(numbers, 0, numbers.size());
+
+    for (int n : numbers) {
+      cout << n << " ";
+    }
+  }
+
+#+END_SRC
+
+#+RESULTS:
+: 1 2 3 4 5 6 7 8 9
+
+**** Haskell implementation
+#+BEGIN_SRC haskell :results output
+  merge :: (Ord a) => [a] -> [a] -> [a]
+  merge [] ys = ys
+  merge xs [] = xs
+  merge (x:xs) (y:ys)
+      | x < y = x:(merge xs (y:ys))
+      | otherwise = y:(merge (x:xs) ys)
+
+  mergesort :: (Ord a) => [a] -> [a]
+  mergesort [] = []
+  mergesort [x] = [x]
+  mergesort xs = merge (mergesort fs) (mergesort ls)
+      where (fs,ls) = splitAt middle xs
+            middle = div (length xs) 2
+
+  main :: IO ()
+  main = print $ mergesort input
+  
+  input :: [Int]
+  input = [9,5,8,2,4,7,6,1,3]
+#+END_SRC
+
+#+RESULTS:
+: [1,2,3,4,5,6,7,8,9]
+
+
 * Hackerrank
 ** Data Structures
 *** Heap
@@ -1309,6 +1523,76 @@ int main() {
     }
   }
 #+END_SRC
+**** Tries: Contacts
+#+BEGIN_SRC c++
+  #include<iostream>
+  #include<string>
+  #include<iomanip>
+  using namespace std;
+
+  struct trie {
+    int counter;
+    trie* children[26];
+  };
+
+  trie* create() {
+    trie* t = new trie;
+    t->counter = 0;
+    for (int i=0; i<26; i++)
+      t->children[i] = nullptr;
+    return t;
+  }
+
+
+  void insert(trie* root, string s) {
+    trie* current = root;
+    for (char c : s) {
+      trie* next = current -> children[c-'a'];
+      if (next == nullptr) {
+        trie* newtrie = create();
+        current->children[c-'a'] = newtrie;
+        current = newtrie;
+      }
+      else
+        current = next; 
+      current->counter++;
+    }
+  }
+
+
+  int count(trie* root, string s) {
+    trie* current = root;
+
+    for (char c : s) {
+      trie* next = current -> children[c-'a'];
+      if (next == nullptr) {
+        return 0;
+      }
+      else {
+        current = next;
+      }
+    }
+
+    return current -> counter;
+  }
+
+
+  int main() {
+    trie* t = create();
+    int cases; 
+    cin >> cases;
+
+    while(cases--) {
+      string op, word;
+      cin >> op >> word;
+      if (op == "add")
+        insert(t, word);
+      else
+        cout << count(t, word) << endl;     
+    }
+  }
+#+END_SRC
+
 *** Techniques
 **** Recursion: Fibonacci numbers
 We *won't use recursion* directly as I want to write a ${\cal O}(log(n))$ solution using matrices.

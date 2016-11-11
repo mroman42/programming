@@ -1286,6 +1286,28 @@ main = do
   let strings = map fate numbers
   mapM_ putStrLn strings
 #+END_SRC
+** Mathematics
+*** Algebra
+**** Easy sum
+#+BEGIN_SRC haskell
+import Control.Monad
+import Control.Applicative
+import Data.Bits
+
+sumTo :: Int -> Int
+sumTo k = (k*(k+1)) `shiftR` 1
+
+easysum :: Int -> Int -> Int
+easysum n m = (n `div` m) * (sumTo (m-1)) + (sumTo r)
+    where r = n `mod` m
+
+main :: IO ()
+main = do
+    cases <- readLn :: IO Int
+    replicateM_ cases $ do
+        [n,m] <- map read <$> words <$> getLine
+        putStrLn $ show $ easysum n m
+#+END_SRC
 ** Cracking the code interview
 *** Data Structures
 **** Arrays: Left Rotation

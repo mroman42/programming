@@ -208,7 +208,26 @@ diagram as a tree, it has $\log(n)$ levels.
   main = print $ mergesort input
   
   input :: [Int]
-  input = [9,5,8,2,4,7,6,1,3]
+  input = [9,5,8,2,4,7,6,1,3,10]
+#+END_SRC
+
+#+RESULTS:
+: [1,2,3,4,5,6,7,8,9,10]
+
+*** Heapsort
+It runs in ${\cal O}(n \log n)$.
+**** Haskell library implementation
+#+BEGIN_SRC haskell :results output
+import Data.Heap as Heap
+
+heapsort :: (Ord a) => [a] -> [a]
+heapsort = Heap.sort
+
+main :: IO ()
+main = print $ heapsort input
+
+input :: [Int]
+input = [7,1,4,9,2,6,3,5,8]
 #+END_SRC
 
 #+RESULTS:

@@ -233,6 +233,85 @@ input = [7,1,4,9,2,6,3,5,8]
 #+RESULTS:
 : [1,2,3,4,5,6,7,8,9]
 
+** Data Structures
+*** TODO Monoids and Finger Trees
+**** Finger Trees
+This code is based upon the article: [[http://apfelmus.nfshost.com/articles/monoid-fingertree.html][Monoids and fingertrees]] by Apfelmus.
+
+#+BEGIN_SRC haskell :results output
+  data Tree v a = Leaf v a
+                | Branch v (Tree v a) (Tree v a)
+
+  toList :: Tree v a -> [a]
+  toList (Leaf _ x) = [x]
+  toList (Branch _ xt yt) = toList xt ++ toList yt
+
+  tag :: Tree v a -> v
+  tag (Leaf v _) = v
+  tag (Branch v _ _) = v
+
+
+  -- Size trees with special constructors
+  type Size = Int
+
+  leaf :: a -> Tree Size a
+  leaf x = Leaf 1 x
+
+  branch :: Tree Size a -> Tree Size a -> Tree Size a
+  branch xt yt = Branch (tag xt + tag yt) xt yt
+
+  (!) :: Tree Size a -> Int -> a
+  (!) (Leaf _ a) 0 = a
+  (!) (Branch _ xt yt) n 
+      | n < tag xt = xt ! n
+      | otherwise  = yt ! (n - tag xt)
+
+  fromList :: [a] -> Tree Size a
+  fromList [x] = leaf x
+  fromList xs = branch (fromList fh) (fromList sh)
+      where
+        (fh,sh) = splitAt (length xs `div` 2) xs
+
+
+  -- Priority queue
+  type Priority = Int
+
+  leafp :: a -> Priority -> Tree Priority a
+  leafp x p = Leaf p x
+
+  branchp :: Tree Priority a -> Tree Priority a -> Tree Priority a
+  branchp lt rt = Branch (min (tag lt) (tag rt)) lt rt
+
+  winner :: Tree Priority a -> a
+  winner (Leaf _ a) = a
+  winner t@(Branch _ x y)
+    | tag t == tag x = winner x
+    | otherwise      = winner y
+
+  fromListp :: [(a,Priority)] -> Tree Priority a
+  fromListp [(x,p)] = leafp x p
+  fromListp xs = branchp (fromListp fh) (fromListp sh)
+      where
+        (fh,sh) = splitAt (length xs `div` 2) xs
+
+
+  -- Example main
+  main :: IO ()
+  main = do
+    print $ fromList [7,5,2,6,4,9,1,3,8] ! 5
+    print $ winner $ fromListp [("a",5),("b",7),("c",3),("d",4)]
+#+END_SRC
+
+#+RESULTS:
+: 9
+: c
+
+**** Monoidal abstraction
+We can abstract this into a monoid:
+
+#+BEGIN_SRC haskell :results output
+
+#+END_SRC
 
 * Hackerrank
 ** Data Structures

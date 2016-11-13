@@ -1731,3 +1731,58 @@ int main(){
     }
   }
 #+END_SRC
+*** Algorithms
+**** DFS: Connected Cell in a Grid 
+#+BEGIN_SRC cpp
+  #include<vector>
+  #include<iostream>
+  using namespace std;
+  typedef vector<vector<bool> > Matrix;
+
+  int count_region(Matrix& matrix, int i, int j) {
+      matrix[i][j] = false;
+      int sum = 1;
+    
+      for (int a = -1; a<2; a++)
+          for (int b = -1; b<2; b++)
+              if (i+a < matrix.size() and i+a >= 0)
+                  if (j+a < matrix.size() and j+b >= 0)
+                      if (matrix[i+a][j+b])
+                          sum += count_region(matrix,i+a,j+b);
+
+      return sum;
+  }
+
+
+  int larger_region(Matrix& matrix) {
+      int max_region = 0;
+
+      for (unsigned i=0; i<matrix.size(); i++) 
+          for (unsigned j=0; j<matrix[i].size(); j++) 
+              if (matrix[i][j]) {
+                  int new_region = count_region(matrix,i,j);
+                  if (new_region > max_region)
+                      max_region = new_region;
+              }
+
+      return max_region;
+  }
+
+
+  int main() {
+      Matrix matrix;
+      int n,m;
+      cin >> n; cin >> m;
+      for (int i=0; i<n; i++) {
+          vector<bool> row;
+          for (int j=0; j<m; j++) {
+              int read;
+              cin >> read;
+              row.push_back(read == 1);
+          }
+          matrix.push_back(row);
+      }
+
+      cout << larger_region(matrix);
+  }
+#+END_SRC

@@ -1442,6 +1442,79 @@ would not lead us to a better complexity.
     putStrLn (concat $ intersperse " " (map show result))
 #+END_SRC
 
+**** Strings: Making Anagrams
+#+BEGIN_SRC cpp
+  #include <vector>
+  #include <cmath>
+  #include <iostream>
+  using namespace std;
+
+  int number_needed(string a, string b) {
+    vector<int> counting;
+    for (int i=0; i<26; i++)
+      counting.push_back(0);
+    
+    for (char c : a)
+      counting[c-'a']++;
+    for (char c : b)
+      counting[c-'a']--;
+    
+    int sum = 0;
+    for (int n : counting)
+      sum += abs(n);
+    
+    return sum;
+  }
+
+  int main(){
+    string a;
+    cin >> a;
+    string b;
+    cin >> b;
+    cout << number_needed(a, b) << endl;
+    return 0;
+  }
+#+END_SRC
+**** Hash Tables: Ransom Note
+#+BEGIN_SRC cpp
+  #include<vector>
+  #include<iostream>
+  #include<unordered_map>
+  #include<string>
+  using namespace std;
+
+  int main() {
+    bool answer = true;
+    int mag_words;
+    int ran_words;
+    cin >> mag_words >> ran_words;
+
+    unordered_map<string,int> magazine;
+    for (int i=0; i<mag_words; i++) {
+      string read;
+      cin >> read;
+      magazine.emplace(read,0);
+      magazine[read]++;    
+    }
+
+    for (int i=0; i<ran_words and answer; i++) {
+      string read;
+      cin >> read;
+      if (magazine.count(read) == 0 or magazine[read] == 0) {
+        answer = false;
+        break;
+      }
+
+      magazine[read]--;
+    }
+
+
+    if (answer)
+      cout << "Yes";
+    else
+      cout << "No";
+  }
+#+END_SRC
 **** Linked Lists: Detect a cycle
 This solution uses two *fast and slow* pointers. The main idea
 is that if you put two pointers into a cycle of length $n$ separated by a

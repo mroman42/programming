@@ -1883,6 +1883,46 @@ int main(){
     }
   }
 #+END_SRC
+**** Recursion: Davis Staircase
+#+BEGIN_SRC cpp
+  #include<vector>
+  #include<iostream>
+  using namespace std;
+  vector<int> solutions;
+
+  int ways_staircase(int staircase) {
+    if (staircase < 0)
+      return 0;
+    if (staircase < solutions.size() and solutions[staircase] != -1)
+      return solutions[staircase];
+
+    int sum = 0;
+    sum += ways_staircase(staircase-1);
+    sum += ways_staircase(staircase-2);
+    sum += ways_staircase(staircase-3);
+
+    while (solutions.size() < staircase)
+      solutions.push_back(-1);
+    if (solutions.size() == staircase)
+      solutions.push_back(staircase);
+    if (staircase < solutions.size())
+      solutions[staircase] = sum;
+    
+    return sum;
+  }
+
+
+  int main() {
+    solutions.push_back(1);
+
+    int cases; cin >> cases;
+    for (int i=0; i<cases; i++) {
+      int staircase;
+      cin >> staircase;
+      cout << ways_staircase(staircase) << endl;
+    }
+  }
+#+END_SRC
 *** Algorithms
 **** DFS: Connected Cell in a Grid 
 #+BEGIN_SRC cpp

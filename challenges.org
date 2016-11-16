@@ -1924,7 +1924,7 @@ int main(){
   }
 #+END_SRC
 *** Algorithms
-**** DFS: Connected Cell in a Grid 
+**** DFS: Connected Cell in a Grid
 #+BEGIN_SRC cpp
   #include<vector>
   #include<iostream>
@@ -1976,5 +1976,139 @@ int main(){
       }
 
       cout << larger_region(matrix);
+  }
+#+END_SRC
+**** Binary Search: Ice Cream Parlor
+#+BEGIN_SRC cpp
+  #include <bits/stdc++.h>
+  using namespace std;
+
+  class IceCream {
+    
+  public: 
+    int flavor; 
+    int index;
+
+    IceCream(int flavor, int index) {
+      this->flavor = flavor;
+      this->index = index;
+    }
+  };
+
+  bool compare(IceCream a, IceCream b) {
+    return a.flavor < b.flavor;
+  }
+
+  int binarySearch(int first, int last, vector<IceCream> arr, int search) {
+    int middle = (first+last)/2;
+
+    while (arr[middle].flavor != search) {
+      if (first > last)
+        return -1;
+            
+      if (arr[middle].flavor < search) {
+        first = middle+1;
+        middle = (first+last)/2;
+      }
+      else if (arr[middle].flavor > search) {
+        last = middle-1;
+        middle = (first+last)/2;
+      }
+    }
+    
+    return arr[middle].index;
+  }
+
+  int main() {
+    int t;
+    int n, m;
+    cin >> t;
+    for(int test = 0; test < t; test++) {       
+      cin >> m >> n;
+      vector<IceCream> arr;
+      arr.reserve(n); 
+
+      for (int i = 0; i < n; i++) {
+        int cost;
+        cin >> cost;
+        arr.push_back(IceCream(cost, i + 1));
+      }
+
+      sort(arr.begin(), arr.end(), compare);
+      int firstIndex = 100000, secondIndex = 100000;
+      for(int i = 0; i < n - 1 ; i++) {
+        int search = m - arr[i].flavor;
+        if(search >= arr[i].flavor) {
+          int index = binarySearch( i + 1, n - 1, arr, search);
+          if( index != -1 ) {
+            cout << min(arr[i].index, index) << " " << max(arr[i].index, index) << endl;
+            break;
+
+          }
+        }
+      }
+
+    }
+
+  }
+#+END_SRC
+**** Sorting: Comparator
+#+BEGIN_SRC python
+  class Player:
+      def __init__(self, name, score):
+          self.name = name
+          self.score = score
+        
+      def __repr__(self):
+          pass
+        
+      def comparator(a, b):
+          if (a.score == b.score):
+              return cmp(a.name,b.name)
+          else:
+              return cmp(b.score,a.score)
+#+END_SRC
+**** DP: Coin Change
+#+BEGIN_SRC cpp
+  #include<vector>
+  #include<iostream>
+  using namespace std;
+  typedef vector< vector<long long> > Matrix;
+  typedef long long int lli;
+
+  lli ways_change(Matrix& ways, vector<int>& coins, int dollars, int limit_coin) {
+    if (dollars < 0)
+      return 0;
+    if (dollars == 0)
+      return 1;
+    if (limit_coin >= coins.size())
+      return 0;
+
+    if (ways[dollars][limit_coin] != -1)
+      return ways[dollars][limit_coin];
+
+    lli counter = 0;
+    counter += ways_change(ways, coins, dollars-coins[limit_coin], limit_coin);
+    counter += ways_change(ways, coins, dollars, limit_coin+1);
+    
+    ways[dollars][limit_coin] = counter;
+    return counter;
+  }
+
+
+  int main() {
+    int n;
+    int m;
+    cin >> n >> m;
+    Matrix ways(n+1, vector<lli>(m,-1));
+    vector<int> coins;
+
+    for (int i=0; i<m; i++) {
+      int read;
+      cin >> read;
+      coins.push_back(read);
+    }
+
+    cout << ways_change(ways,coins,n,0);
   }
 #+END_SRC

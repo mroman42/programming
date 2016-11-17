@@ -1833,6 +1833,7 @@ It uses bit manipulation in order to get the binary decomposition of the input.
 **** Bit manipulation: Lonely integer
 Folds using =xor=. Every element will be cancelled out with its pair,
 except for the result.
+
 #+BEGIN_SRC c++
 #include <vector>
 #include <iostream>
@@ -2069,6 +2070,9 @@ int main(){
               return cmp(b.score,a.score)
 #+END_SRC
 **** DP: Coin Change
+***** Naive approach
+A naive solution using ${\cal O}(nm)$ space.
+
 #+BEGIN_SRC cpp
   #include<vector>
   #include<iostream>
@@ -2110,5 +2114,86 @@ int main(){
     }
 
     cout << ways_change(ways,coins,n,0);
+  }
+#+END_SRC
+
+***** Better solution
+A better solution using ${\cal O}(n)$ space.
+
+#+BEGIN_SRC cpp
+  #include<vector>
+  #include<iostream>
+  using namespace std;
+  typedef long long int lli;
+
+  int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<int> coins(m);
+    for (int i=0; i<m; i++)
+      cin >> coins[i];
+
+    vector<lli> ways(n+1,0);
+    ways[0] = 1;
+
+    for (int i=0; i < coins.size(); i++)
+      for (int j=coins[i]; j < ways.size(); j++)
+        ways[j] += ways[j-coins[i]];
+
+    cout << ways[n];
+  }
+#+END_SRC
+**** BFS: Shortest Reach
+#+BEGIN_SRC cpp
+  #include<vector>
+  #include<queue>
+  #include<iostream>
+  using namespace std;
+  typedef vector< vector<int> > Graph;
+
+  int main() {
+    int cases;
+    cin >> cases;
+    for (int k=0; k<cases; k++) {
+      int nodes;
+      int edges;
+      cin >> nodes >> edges;
+      Graph graph(nodes, vector<int>());
+      vector<int> distance(nodes, -1);
+      queue<int> to_visit;
+
+      for (int i=0; i<edges; i++) {
+        int a, b;
+        cin >> a >> b;
+        a = a-1;
+        b = b-1;
+        graph[a].push_back(b);
+        graph[b].push_back(a);
+      }
+
+      int initial_node;
+      cin >> initial_node;
+      initial_node = initial_node-1;
+      to_visit.push(initial_node);
+      distance[initial_node] = 0;
+
+      while (!to_visit.empty()) {
+        int current = to_visit.front();
+        to_visit.pop();
+            
+        for (int i=0; i<graph[current].size(); i++) {
+          int next = graph[current][i];
+          if (distance[next] == -1) {
+            distance[next] = distance[current] + 6;
+            to_visit.push(next);
+          }
+        }
+      }
+
+      for (int i=0; i<distance.size(); i++)
+        if (i != initial_node)
+          cout << distance[i] << " ";
+      cout << endl;
+    }
   }
 #+END_SRC

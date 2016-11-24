@@ -48,7 +48,8 @@ An average performance of ${\cal O}(n^2)$.
 An average performance of ${\cal O}(n \log(n))$, but the worst-case performance is of ${\cal O}(n^2)$.
 
 **** C++ Implementation
-#+BEGIN_SRC cpp :cmdline <<< '9 5 7 3 6 2 8 4 1'
+:cmdline <<< '9 5 7 3 6 2 8 4 1'
+#+BEGIN_SRC cpp :cmdline <<< '7 6 5 4 3 2 1'
   #include<iostream>
   #include<vector>
   using namespace std;
@@ -93,7 +94,7 @@ An average performance of ${\cal O}(n \log(n))$, but the worst-case performance 
 #+END_SRC
 
 #+RESULTS:
-: 1 2 3 4 5 6 7 8 9
+: 1 2 3 4 5 6 7
 
 **** Haskell Implementation
 #+BEGIN_SRC haskell :results output
@@ -895,32 +896,32 @@ handleCase = do n <- readLn :: IO Int
 #+END_SRC
 **** Lists and GCD
 #+BEGIN_SRC haskell
-import Control.Monad
-import Data.List (intercalate)
+  import Control.Monad
+  import Data.List (intercalate)
 
-gcdlist :: [[(Int,Int)]] -> [(Int,Int)]
-gcdlist xs = foldr gcdtwo (head xs) xs
+  gcdlist :: [[(Int,Int)]] -> [(Int,Int)]
+  gcdlist xs = foldr gcdtwo (head xs) xs
 
-gcdtwo :: [(Int,Int)] -> [(Int,Int)] -> [(Int,Int)]
-gcdtwo [] _  = []
-gcdtwo _  [] = []
-gcdtwo ((x,n):xs) ((y,m):ys)
-  | (x == y) = (x, min n m):(gcdtwo xs ys)
-  | (x <  y) = gcdtwo xs ((y,m):ys)
-  | (x >  y) = gcdtwo ((x,n):xs) ys
+  gcdtwo :: [(Int,Int)] -> [(Int,Int)] -> [(Int,Int)]
+  gcdtwo [] _  = []
+  gcdtwo _  [] = []
+  gcdtwo ((x,n):xs) ((y,m):ys)
+    | (x == y) = (x, min n m):(gcdtwo xs ys)
+    | (x <  y) = gcdtwo xs ((y,m):ys)
+    | (x >  y) = gcdtwo ((x,n):xs) ys
 
-pairs :: [a] -> [(a,a)]
-pairs []       = []
-pairs (x:y:xs) = (x,y):(pairs xs)
+  pairs :: [a] -> [(a,a)]
+  pairs []       = []
+  pairs (x:y:xs) = (x,y):(pairs xs)
 
-showPair :: (Show a) => (a,a) -> String
-showPair (x,y) = (show x) ++ " " ++ (show y) 
+  showPair :: (Show a) => (a,a) -> String
+  showPair (x,y) = (show x) ++ " " ++ (show y) 
 
-main :: IO ()
-main = do
-  cases <- readLn :: IO Int
-  lists <- replicateM cases (fmap (pairs . (map read) . words) getLine)
-  putStrLn $ intercalate " " $ map showPair $ gcdlist lists
+  main :: IO ()
+  main = do
+    cases <- readLn :: IO Int
+    lists <- replicateM cases (fmap (pairs . (map read) . words) getLine)
+    putStrLn $ intercalate " " $ map showPair $ gcdlist lists
 #+END_SRC
 **** Tree Manager
 #+BEGIN_SRC haskell
@@ -1785,198 +1786,95 @@ int main() {
     }
   }
 #+END_SRC
-
-*** Techniques
-**** Recursion: Fibonacci numbers
-We *won't use recursion* directly as I want to write a ${\cal O}(log(n))$ solution using matrices.
-It uses bit manipulation in order to get the binary decomposition of the input.
-#+BEGIN_SRC c++
-  #include<vector>
-  #include<iostream>
-  using namespace std;
-
-  typedef vector<int> Matrix;
-
-  Matrix product(Matrix& a, Matrix& b) {
-    Matrix prod;
-    prod[0] = a[0]*b[0]+a[1]*b[2];
-    prod[1] = a[0]*b[1]+a[1]*b[3];
-    prod[2] = a[2]*b[0]+a[3]*b[2];
-    prod[3] = a[2]*b[1]+a[3]*b[3];
-    return prod;
-  }
-
-  int main() {
-    int input; cin >> input;
-    Matrix fib;
-    fib.push_back(1);
-    fib.push_back(1);
-    fib.push_back(1);
-    fib.push_back(0);
-    Matrix result;
-    result.push_back(1);
-    result.push_back(0);
-    result.push_back(0);
-    result.push_back(1);
-
-    while (input) {
-      if (input & 1)
-        result = product(result,fib);
-
-      fib = product(fib,fib);
-      input = (input >> 1);
-    }
-
-    cout << result[1] << endl;
-  }
-#+END_SRC
-**** Bit manipulation: Lonely integer
-Folds using =xor=. Every element will be cancelled out with its pair,
-except for the result.
-
-#+BEGIN_SRC c++
-#include <vector>
-#include <iostream>
-using namespace std;
-
-int lonely_integer(vector < int > a) {
-    int result = 0;
-    for (int i=0; i<a.size(); i++)
-        result ^= a[i];
-    return result;
-}
-
-int main(){
-    int n;
-    cin >> n;
-    vector<int> a(n);
-    for(int a_i = 0;a_i < n;a_i++){
-       cin >> a[a_i];
-    }
-    cout << lonely_integer(a) << endl;
-    return 0;
-}
-#+END_SRC
-**** Time complexity: Primality
-#+BEGIN_SRC c++
-  #include<iostream>
-  #include<cmath>
-  using namespace std;
-
-  int main() {
-    int cases; cin >> cases;
-    for (int i=0; i<cases; i++) {
-      int input; cin >> input;
-      bool is_prime = true;
-
-      if (not (input > 1))
-        is_prime = false;
-    
-      // Primality checker
-      int root = (int) sqrt(input)+1;
-      for (int i=2; i<root and is_prime; i++)
-        is_prime = (input % i != 0);
-
-      if (is_prime)
-        cout << "Prime" << endl;
-      else
-        cout << "Not prime" << endl;
-    }
-  }
-#+END_SRC
-**** Recursion: Davis Staircase
-#+BEGIN_SRC cpp
-  #include<vector>
-  #include<iostream>
-  using namespace std;
-  vector<int> solutions;
-
-  int ways_staircase(int staircase) {
-    if (staircase < 0)
-      return 0;
-    if (staircase < solutions.size() and solutions[staircase] != -1)
-      return solutions[staircase];
-
-    int sum = 0;
-    sum += ways_staircase(staircase-1);
-    sum += ways_staircase(staircase-2);
-    sum += ways_staircase(staircase-3);
-
-    while (solutions.size() < staircase)
-      solutions.push_back(-1);
-    if (solutions.size() == staircase)
-      solutions.push_back(staircase);
-    if (staircase < solutions.size())
-      solutions[staircase] = sum;
-    
-    return sum;
-  }
-
-
-  int main() {
-    solutions.push_back(1);
-
-    int cases; cin >> cases;
-    for (int i=0; i<cases; i++) {
-      int staircase;
-      cin >> staircase;
-      cout << ways_staircase(staircase) << endl;
-    }
-  }
-#+END_SRC
 *** Algorithms
-**** DFS: Connected Cell in a Grid
+**** Sorting: Bubble Sort
+**** Sorting: Comparator
+#+BEGIN_SRC python
+  class Player:
+      def __init__(self, name, score):
+          self.name = name
+          self.score = score
+        
+      def __repr__(self):
+          pass
+        
+      def comparator(a, b):
+          if (a.score == b.score):
+              return cmp(a.name,b.name)
+          else:
+              return cmp(b.score,a.score)
+#+END_SRC
+**** Merge Sort: Counting Inversions
 #+BEGIN_SRC cpp
   #include<vector>
   #include<iostream>
   using namespace std;
-  typedef vector<vector<bool> > Matrix;
+  typedef long long int lli;
 
-  int count_region(Matrix& matrix, int i, int j) {
-      matrix[i][j] = false;
-      int sum = 1;
-    
-      for (int a = -1; a<2; a++)
-          for (int b = -1; b<2; b++)
-              if (i+a < matrix.size() and i+a >= 0)
-                  if (j+a < matrix.size() and j+b >= 0)
-                      if (matrix[i+a][j+b])
-                          sum += count_region(matrix,i+a,j+b);
+  lli merge(vector<int>& array, int left, int right) {
+    lli swaps = 0;
+    int middle = (left+right)/2;
+    vector<int> left_array(array.begin()+left, array.begin()+middle);
+    vector<int> right_array(array.begin()+middle, array.begin()+right);
 
-      return sum;
+    int i = 0;
+    int j = 0;
+    int k = left;
+
+    while (i < left_array.size() and j < right_array.size()) {
+      if (left_array[i] <= right_array[j]) {
+        array[k] = left_array[i];
+        i++;
+        k++;
+      }
+      else {
+        array[k] = right_array[j];
+        j++;
+        k++;
+        swaps += left_array.size()-i;
+      }
+    }
+
+
+    while (i < left_array.size()) {
+      array[k] = left_array[i];
+      i++;
+      k++;
+    }
+
+    while (j < right_array.size()) {
+      array[k] = right_array[j];
+      j++;
+      k++;
+    }
+
+    return swaps;
   }
 
 
-  int larger_region(Matrix& matrix) {
-      int max_region = 0;
+  lli mergesort(vector<int>& array, int left, int right) {
+    if (right-left < 2)
+      return 0;
 
-      for (unsigned i=0; i<matrix.size(); i++) 
-          for (unsigned j=0; j<matrix[i].size(); j++) 
-              if (matrix[i][j]) {
-                  int new_region = count_region(matrix,i,j);
-                  if (new_region > max_region)
-                      max_region = new_region;
-              }
+    lli swaps = 0;
+    int middle = (left+right)/2;
+    swaps += mergesort(array, left, middle);
+    swaps += mergesort(array, middle, right);
+    swaps += merge(array, left, right);    
 
-      return max_region;
+    return swaps;
   }
 
 
   int main() {
-      Matrix matrix;
-      int n,m;
-      cin >> n; cin >> m;
-      for (int i=0; i<n; i++) {
-          vector<bool> row;
-          for (int j=0; j<m; j++) {
-              int read;
-              cin >> read;
-              row.push_back(read == 1);
-          }
-          matrix.push_back(row);
-      }
-
-      cout << larger_region(matrix);
+    int d; cin >> d;
+    for (int cases=0; cases<d; cases++) {
+      int n; cin >> n;
+      vector<int> array(n);
+      for (int i=0; i<n; i++)
+        cin >> array[i];
+      cout << mergesort(array,0,array.size()) << endl;
+    }
   }
 #+END_SRC
 **** Binary Search: Ice Cream Parlor
@@ -2053,21 +1951,225 @@ int main(){
 
   }
 #+END_SRC
-**** Sorting: Comparator
-#+BEGIN_SRC python
-  class Player:
-      def __init__(self, name, score):
-          self.name = name
-          self.score = score
-        
-      def __repr__(self):
-          pass
-        
-      def comparator(a, b):
-          if (a.score == b.score):
-              return cmp(a.name,b.name)
-          else:
-              return cmp(b.score,a.score)
+**** DFS: Connected Cell in a Grid
+#+BEGIN_SRC cpp
+  #include<vector>
+  #include<iostream>
+  using namespace std;
+  typedef vector<vector<bool> > Matrix;
+
+  int count_region(Matrix& matrix, int i, int j) {
+      matrix[i][j] = false;
+      int sum = 1;
+    
+      for (int a = -1; a<2; a++)
+          for (int b = -1; b<2; b++)
+              if (i+a < matrix.size() and i+a >= 0)
+                  if (j+a < matrix.size() and j+b >= 0)
+                      if (matrix[i+a][j+b])
+                          sum += count_region(matrix,i+a,j+b);
+
+      return sum;
+  }
+
+
+  int larger_region(Matrix& matrix) {
+      int max_region = 0;
+
+      for (unsigned i=0; i<matrix.size(); i++) 
+          for (unsigned j=0; j<matrix[i].size(); j++) 
+              if (matrix[i][j]) {
+                  int new_region = count_region(matrix,i,j);
+                  if (new_region > max_region)
+                      max_region = new_region;
+              }
+
+      return max_region;
+  }
+
+
+  int main() {
+      Matrix matrix;
+      int n,m;
+      cin >> n; cin >> m;
+      for (int i=0; i<n; i++) {
+          vector<bool> row;
+          for (int j=0; j<m; j++) {
+              int read;
+              cin >> read;
+              row.push_back(read == 1);
+          }
+          matrix.push_back(row);
+      }
+
+      cout << larger_region(matrix);
+  }
+#+END_SRC
+**** BFS: Shortest Reach
+#+BEGIN_SRC cpp
+  #include<vector>
+  #include<queue>
+  #include<iostream>
+  using namespace std;
+  typedef vector< vector<int> > Graph;
+
+  int main() {
+    int cases;
+    cin >> cases;
+    for (int k=0; k<cases; k++) {
+      int nodes;
+      int edges;
+      cin >> nodes >> edges;
+      Graph graph(nodes, vector<int>());
+      vector<int> distance(nodes, -1);
+      queue<int> to_visit;
+
+      for (int i=0; i<edges; i++) {
+        int a, b;
+        cin >> a >> b;
+        a = a-1;
+        b = b-1;
+        graph[a].push_back(b);
+        graph[b].push_back(a);
+      }
+
+      int initial_node;
+      cin >> initial_node;
+      initial_node = initial_node-1;
+      to_visit.push(initial_node);
+      distance[initial_node] = 0;
+
+      while (!to_visit.empty()) {
+        int current = to_visit.front();
+        to_visit.pop();
+            
+        for (int i=0; i<graph[current].size(); i++) {
+          int next = graph[current][i];
+          if (distance[next] == -1) {
+            distance[next] = distance[current] + 6;
+            to_visit.push(next);
+          }
+        }
+      }
+
+      for (int i=0; i<distance.size(); i++)
+        if (i != initial_node)
+          cout << distance[i] << " ";
+      cout << endl;
+    }
+  }
+#+END_SRC
+
+*** Techniques
+**** Time complexity: Primality
+#+BEGIN_SRC c++
+  #include<iostream>
+  #include<cmath>
+  using namespace std;
+
+  int main() {
+    int cases; cin >> cases;
+    for (int i=0; i<cases; i++) {
+      int input; cin >> input;
+      bool is_prime = true;
+
+      if (not (input > 1))
+        is_prime = false;
+    
+      // Primality checker
+      int root = (int) sqrt(input)+1;
+      for (int i=2; i<root and is_prime; i++)
+        is_prime = (input % i != 0);
+
+      if (is_prime)
+        cout << "Prime" << endl;
+      else
+        cout << "Not prime" << endl;
+    }
+  }
+#+END_SRC
+**** Recursion: Fibonacci numbers
+We *won't use recursion* directly as I want to write a ${\cal O}(log(n))$ solution using matrices.
+It uses bit manipulation in order to get the binary decomposition of the input.
+#+BEGIN_SRC c++
+  #include<vector>
+  #include<iostream>
+  using namespace std;
+
+  typedef vector<int> Matrix;
+
+  Matrix product(Matrix& a, Matrix& b) {
+    Matrix prod;
+    prod[0] = a[0]*b[0]+a[1]*b[2];
+    prod[1] = a[0]*b[1]+a[1]*b[3];
+    prod[2] = a[2]*b[0]+a[3]*b[2];
+    prod[3] = a[2]*b[1]+a[3]*b[3];
+    return prod;
+  }
+
+  int main() {
+    int input; cin >> input;
+    Matrix fib;
+    fib.push_back(1);
+    fib.push_back(1);
+    fib.push_back(1);
+    fib.push_back(0);
+    Matrix result;
+    result.push_back(1);
+    result.push_back(0);
+    result.push_back(0);
+    result.push_back(1);
+
+    while (input) {
+      if (input & 1)
+        result = product(result,fib);
+
+      fib = product(fib,fib);
+      input = (input >> 1);
+    }
+
+    cout << result[1] << endl;
+  }
+#+END_SRC
+**** Recursion: Davis' Staircase
+#+BEGIN_SRC cpp
+  #include<vector>
+  #include<iostream>
+  using namespace std;
+  vector<int> solutions;
+
+  int ways_staircase(int staircase) {
+    if (staircase < 0)
+      return 0;
+    if (staircase < solutions.size() and solutions[staircase] != -1)
+      return solutions[staircase];
+
+    int sum = 0;
+    sum += ways_staircase(staircase-1);
+    sum += ways_staircase(staircase-2);
+    sum += ways_staircase(staircase-3);
+
+    while (solutions.size() < staircase)
+      solutions.push_back(-1);
+    if (solutions.size() == staircase)
+      solutions.push_back(staircase);
+    if (staircase < solutions.size())
+      solutions[staircase] = sum;
+    
+    return sum;
+  }
+
+
+  int main() {
+    solutions.push_back(1);
+
+    int cases; cin >> cases;
+    for (int i=0; i<cases; i++) {
+      int staircase;
+      cin >> staircase;
+      cout << ways_staircase(staircase) << endl;
+    }
+  }
 #+END_SRC
 **** DP: Coin Change
 ***** Naive approach
@@ -2143,57 +2245,725 @@ A better solution using ${\cal O}(n)$ space.
     cout << ways[n];
   }
 #+END_SRC
-**** BFS: Shortest Reach
+**** Bit manipulation: Lonely integer
+Folds using =xor=. Every element will be cancelled out with its pair,
+except for the result.
+
+#+BEGIN_SRC c++
+#include <vector>
+#include <iostream>
+using namespace std;
+
+int lonely_integer(vector < int > a) {
+    int result = 0;
+    for (int i=0; i<a.size(); i++)
+        result ^= a[i];
+    return result;
+}
+
+int main(){
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for(int a_i = 0;a_i < n;a_i++){
+       cin >> a[a_i];
+    }
+    cout << lonely_integer(a) << endl;
+    return 0;
+}
+#+END_SRC
+* Interview problems
+** Google example interview
+Taken from [[https://www.youtube.com/watch?v=XKu_SEDAykw][this youtube video]]:
+
 #+BEGIN_SRC cpp
+  bool HasPairWithSum (vector<int>& numbers, int sum) {
+    unordered_set<int> complements;
+  
+    for (int n : numbers) {
+      if (complements.find(n) != complements.end())
+        return true;
+      complements.add(sum-n);
+    }
+
+    return false;
+  }
+#+END_SRC
+* Python Kung-fu
+From the [[https://github.com/PythonGranada/python-kung-fu/][Python Kung-fu repository]].
+
+** 0. String permutation
+Using a vector as a sort of a hash, running in ${\cal O}(n)$.
+#+BEGIN_SRC cpp :cmdline <<< 'asdf fsda'
   #include<vector>
-  #include<queue>
+  #include<string>
   #include<iostream>
   using namespace std;
-  typedef vector< vector<int> > Graph;
+
+  bool is_permutation(string a, string b) {
+      vector<int> counter(26,0);
+      for (char c : a)
+          counter[c-'a']++;
+      for (char c : b)
+          counter[c-'a']--;
+
+      for (int ocurrences : counter)
+          if (ocurrences != 0)
+              return false;
+
+      return true;
+  }
 
   int main() {
-    int cases;
-    cin >> cases;
-    for (int k=0; k<cases; k++) {
-      int nodes;
-      int edges;
-      cin >> nodes >> edges;
-      Graph graph(nodes, vector<int>());
-      vector<int> distance(nodes, -1);
-      queue<int> to_visit;
+    string a,b;
+    cin >> a >> b;
+  
+    // Checking that the two sizes are equal discards a lot of
+    // edge cases.
+    if (a.size() == b.size() and is_permutation(a,b))
+      cout << "Permutation";
+    else
+      cout << "Not a permutation";
+  }
+#+END_SRC
 
-      for (int i=0; i<edges; i++) {
-        int a, b;
-        cin >> a >> b;
-        a = a-1;
-        b = b-1;
-        graph[a].push_back(b);
-        graph[b].push_back(a);
+#+RESULTS:
+: Permutation
+
+** 1. Unique characters
+*** With a boolean vector
+#+BEGIN_SRC cpp :cmdline <<< 'afsgdf'
+  #include<vector>
+  #include<iostream>
+  #include<string>
+  #include<stdint.h>
+  using namespace std;
+
+  bool unique_chars(string str) {
+    if (str.size() > 26)
+      return false;
+
+    int32_t counter = 0;
+    for (char c : str)
+      if ((counter & (1 << (c-'a'))) != 0)
+        return false;
+      else
+        counter |= (1 << (c-'a'));
+    return true;
+  }
+
+  int main() {
+    string str;
+    cin >> str;
+
+    if (unique_chars(str))
+      cout << "Unique characters";
+    else
+      cout << "Repeated characters";
+  }
+#+END_SRC
+
+#+RESULTS:
+: Repeated characters
+
+*** Without additional data structures
+#+BEGIN_SRC cpp :cmdline <<< 'afsgdf'
+  #include<vector>
+  #include<algorithm>
+  #include<iostream>
+  using namespace std;
+
+  bool unique_chars(string str) {
+    if (str.size() > 26)
+      return false;
+    
+    make_heap(str.begin(), str.end());
+    sort_heap(str.begin(), str.end());
+    for (int i=0; i<str.size()-1; i++)
+      if (str[i] == str[i+1])
+        return false;
+
+    return true;
+  }
+
+  int main() {
+    string str;
+    cin >> str;
+
+    if (unique_chars(str))
+      cout << "Unique characters";
+    else
+      cout << "Repeated characters";
+  }
+#+END_SRC
+
+#+RESULTS:
+: Repeated characters
+* Leetcode
+** 31. Next permutation
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      void nextPermutation(vector<int>& arr) {
+          if (arr.size() == 0)
+              return;
+
+          // Find maximum sequence
+          int end = arr.size()-1;
+          while (end != 0 and arr[end]<=arr[end-1])
+              end--;
+
+          // Reverse the array
+          int left = end;
+          int right = arr.size()-1;
+          while (left < right) {
+              int swap = arr[left];
+              arr[left] = arr[right];
+              arr[right] = swap;
+              left++;
+              right--;
+          }
+
+          // Include next element
+          if (end != 0) {
+              int moving = end;
+              while(arr[end-1] >= arr[moving])
+                  moving++;
+    
+              int swap = arr[end-1];
+              arr[end-1] = arr[moving];
+              arr[moving] = swap;
+          }
+      }
+  };
+#+END_SRC
+** DONE 33. Search in rotated sorted array
+** 66. Plus One
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      vector<int> plusOne(vector<int>& digits) {
+          int position = digits.size()-1;
+          digits[position]++;
+        
+          while (digits[position] > 9 and position > 0) {
+              digits[position] %= 10;
+              position--;
+              digits[position]++;
+          }
+        
+          if (digits[position] > 9) {
+              digits[position] %= 10;
+              digits.insert(digits.begin(), 1);
+          }
+        
+          return digits;
+      }
+  };
+#+END_SRC
+** 74. Search a 2D matrix
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      bool searchMatrix(vector<vector<int>>& matrix, int target) {
+          int m = matrix.size();
+          int n = matrix[0].size();
+          int size = n*m;
+
+          int left = 0;
+          int right = size;
+          while (left < right) {
+              int middle = (left+right)/2;
+              int attempt = matrix[middle/n][middle%n];
+
+              if (target < attempt)
+                  right = middle;
+              else if (target > attempt)
+                  left = middle+1;
+              else
+                  return true;
+          }
+
+          return false;
+      }
+  };
+#+END_SRC
+** DONE 84. Largest Rectangle in Histogram
+** 113. Path Sum II
+#+BEGIN_SRC cpp
+  /**
+   ,* Definition for a binary tree node.
+   ,* struct TreeNode {
+   ,*     int val;
+   ,*     TreeNode *left;
+   ,*     TreeNode *right;
+   ,*     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+   ,* };
+   ,*/
+  class Solution {
+  public:
+    vector<vector<int>> pathSum(TreeNode* root, int sum) {
+      vector<vector<int>> result;
+      pathSumAcc(root,sum,result,vector<int>());
+      return result;
+    }
+
+    void pathSumAcc(TreeNode* root, int sum, vector<vector<int>>& result, vector<int> acc) {
+      if (root == nullptr) {
+        if (sum == 0 and acc.size() != 0) 
+          result.push_back(acc);
+        return;
+      }
+        
+      if (root->left == nullptr and root->right == nullptr)
+        if (sum == root->val) {
+          acc.push_back(root->val);
+          result.push_back(acc);
+          return;
+        }    
+        
+      acc.push_back(root->val);
+      if (root->right != nullptr) pathSumAcc(root->right, sum-root->val, result, acc);
+      if (root->left != nullptr) pathSumAcc(root->left, sum-root->val, result, acc);
+    }
+  };
+#+END_SRC
+** 121. Best Time to Buy and Sell Stock
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      int maxProfit(vector<int>& prices) {
+          if (prices.size() == 0)
+              return 0;
+        
+          int max = prices[0];
+          int min = prices[0];
+          int profit = 0;
+        
+          for (int p : prices) {
+              if (p<min) {
+                  min = p;
+                  max = p;
+              }
+              if (p>max) {
+                  max = p;
+              }
+            
+              if (max-min > profit)
+                  profit = max-min;
+          }
+        
+          return profit;
+      }
+  };
+#+END_SRC
+** 133. Clone Graph
+#+BEGIN_SRC cpp
+  class Solution {
+  private:
+      unordered_map<int, UndirectedGraphNode*> cloned;
+  public:
+      UndirectedGraphNode* cloneGraph(UndirectedGraphNode* node) {
+          if (node == nullptr)
+              return nullptr;
+
+          int label = node->label;
+
+          if (cloned.find(label) != cloned.end()) 
+              return cloned[label];
+
+          UndirectedGraphNode* newnode = new UndirectedGraphNode(label);
+          cloned[label] = newnode;
+        
+          for (UndirectedGraphNode* neighbor : node->neighbors)
+              newnode->neighbors.push_back(cloneGraph(neighbor));
+        
+          return newnode;
+    
+      }
+  };
+#+END_SRC
+** 153. Find Minimum in Rotated Sorted Array
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+    int findMin(vector<int>& nums) {
+      if (nums.size() == 1)
+        return nums[0];
+
+      int pivot = nums[0];
+      int i = 0;
+      int j = nums.size()-1;
+
+      if (nums[j] > pivot)
+        return pivot;
+
+      while (j > i+1) {
+        int m = (i+j)/2;
+        if (nums[m] > pivot)
+          i = m;
+        else
+          j = m;
       }
 
-      int initial_node;
-      cin >> initial_node;
-      initial_node = initial_node-1;
-      to_visit.push(initial_node);
-      distance[initial_node] = 0;
+      return nums[j];
+    }
+  };
+#+END_SRC
 
-      while (!to_visit.empty()) {
-        int current = to_visit.front();
-        to_visit.pop();
-            
-        for (int i=0; i<graph[current].size(); i++) {
-          int next = graph[current][i];
-          if (distance[next] == -1) {
-            distance[next] = distance[current] + 6;
-            to_visit.push(next);
+** 169. Majority element
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+    int majorityElement(vector<int>& nums) {
+      int counter = 0;
+      int majority = 0;
+
+      for (int n : nums)
+        if (n == majority)
+          counter++;
+        else if (counter == 0) {
+          majority = n;
+          counter++;
+        }
+        else
+          counter--;
+
+      return majority;
+    }
+  };
+#+END_SRC
+** 187. Repeated DNA Sequences
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      vector<string> findRepeatedDnaSequences(string s) {
+          unordered_set<string> sequences;
+          unordered_set<string> repeated;
+
+          for (int i=9; i < s.size(); i++) {
+              string sub = s.substr(i-9,10);
+              if (sequences.find(sub) == sequences.end())
+                  sequences.insert(sub);
+              else
+                 repeated.insert(sub);
           }
+        
+          vector<string> repeatedv(0,"");
+          for (string st : repeated)
+              repeatedv.push_back(st);
+          return repeatedv;
+      }
+  };
+#+END_SRC
+** 191. Number of 1 bits
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      int hammingWeight(uint32_t n) {
+          int counter = 0;
+          while (n != 0) {
+              if (n & 1)
+                  counter++;
+              n >>= 1;
+          }
+          return counter;
+      }
+  };
+#+END_SRC
+** 215. Kth Largest Element in Array
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      int select(vector<int>& nums, const int k, const int left, const int right) {
+          const int pivot = nums[left];
+          int i = left+1;
+          int j = right;
+        
+          while (i <= j) {
+              while (nums[i] < pivot)
+                  i++;                
+              while (nums[j] >= pivot and j>left)
+                  j--;
+              if (i < j) {
+                  int swap = nums[i];
+                  nums[i] = nums[j];
+                  nums[j] = swap;
+              }
+          }
+
+          // changes pivot
+          nums[left] = nums[j];
+          nums[j] = pivot;
+
+          if (k < j)
+              return select(nums, k, left, j-1);
+          else if (k > j)
+              return select(nums, k, j+1, right);
+          else
+              return pivot;
+      }
+
+      int findKthLargest(vector<int>& nums, int k) {
+          return select(nums, nums.size()-k, 0, nums.size()-1);
+      }
+  };
+#+END_SRC
+** 219. Contains Duplicate II
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      bool containsNearbyDuplicate(vector<int>& nums, int k) {
+          unordered_set<int> nearby;
+        
+          for (int i=0; i<nums.size(); i++) {
+              if (nearby.find(nums[i]) != nearby.end())
+                  return true;
+            
+              nearby.insert(nums[i]);
+            
+              if (i>=k)
+                  nearby.erase(nums[i-k]);
+          }
+        
+          return false;
+      }
+  };
+#+END_SRC
+** 229. Majority Element II
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+    vector<int> majorityElement(vector<int>& nums) {
+      int counter1 = 0;
+      int counter2 = 0;
+      int maj1 = 0;
+      int maj2 = 0;
+    
+      // Looks for candidates
+      for (int n : nums) {
+        if (n == maj1)
+          counter1++;
+        else if (n == maj2)
+          counter2++;
+        else if (counter1 == 0) {
+          maj1 = n;
+          counter1++;
+        }
+        else if (counter2 == 0) {
+          maj2 = n;
+          counter2++;
+        }
+        else {
+          counter1--;
+          counter2--;
         }
       }
 
-      for (int i=0; i<distance.size(); i++)
-        if (i != initial_node)
-          cout << distance[i] << " ";
-      cout << endl;
+      // Checks the elements
+      int checkcount1 = 0;
+      int checkcount2 = 0;
+      for (int n : nums) {
+        if (n == maj1) checkcount1++;
+        if (n == maj2) checkcount2++;
+      }
+
+      vector<int> solution;
+      if (checkcount1 > nums.size()/3)
+        solution.push_back(maj1);
+      if (checkcount2 > nums.size()/3 and maj2 != maj1)
+        solution.push_back(maj2);
+      return solution;
     }
-  }
+  };
 #+END_SRC
+** 240. Search a 2D Matrix II
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      bool searchMatrix(vector<vector<int>>& matrix, int target) {
+          int m = matrix.size();
+          int n = matrix[0].size();
+          int size = n*m;
+  
+          int xp = m-1;
+          int yp = 0;
+  
+          while (yp < n and xp >= 0) {
+              if (matrix[xp][yp] < target)
+                  yp++;
+              else if (matrix[xp][yp] > target)
+                  xp--;
+              else
+                  return true;
+          }  
+  
+          return false;
+      }
+  };
+#+END_SRC
+** 343. Integer Break
+Using the AM-GM inequality.
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      int integerBreak(int n) {
+          if (n == 1) return 1;
+          if (n == 2) return 1;
+          if (n == 3) return 2;
+        
+          int product = 1;
+          if (n%3 == 1) {
+              n -= 4; 
+              product *= 4;
+          }
+          if (n%3 == 2) {
+              n -= 2;
+              product *= 2;
+          }
+        
+          while (n > 0) {
+              n -= 3;
+              product *= 3;
+          }
+        
+          return product;   
+      }
+  };
+#+END_SRC
+** 371. Sum of two integers
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      int getSum(int a, int b) {
+          if (b == 0)
+              return a;
+          return getSum(a ^ b, (a & b) << 1);
+      }
+  };
+#+END_SRC
+** 388. Counting Bits
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      vector<int> countBits(int num) {
+          vector<int> count(num+1,0);
+      
+          for (int i=1; i<num+1; i++)
+              count[i] = count[i>>1] + (i&1);
+      
+          return count;
+      }
+  };
+#+END_SRC
+** 397. Integer Replacement
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      int integerReplacement(int n) {
+          if (n == 2147483647) return 32;
+        
+          int counter = 0;
+        
+          while (n > 3) {
+              if (n & 1) {
+                  if (n & 2)
+                      n++;
+                  else 
+                      n--;
+              }
+              else 
+                  n >>= 1;
+              counter++;
+          }
+        
+          if (n==3) return 2+counter;
+          if (n==2) return 1+counter;
+          return counter;
+      }
+  };
+#+END_SRC
+** DONE 412. Fizz Buzz
+** DONE 441. Arranging Coins
+** 445. Add two numbers
+*** Reversing lists solution
+#+BEGIN_SRC cpp
+  /**
+   ,* Definition for singly-linked list.
+   ,* struct ListNode {
+   ,*     int val;
+   ,*     ListNode* next;
+   ,*     ListNode(int x) : val(x), next(NULL) {}
+   ,* };
+   ,*/
+  class Solution {
+  private:
+      ListNode* reverse(ListNode* head) {
+          ListNode* previous = nullptr;
+          ListNode* current = head;
+
+          while (current != nullptr) {
+              ListNode* following = current->next;
+              current->next = previous;
+              previous = current;
+              current = following;
+          }
+        
+          return previous;
+      }
+    
+      ListNode* skipzeroes(ListNode* sum) {
+          while (sum != nullptr and sum->val==0)
+              sum = sum->next;
+        
+          if (sum == nullptr)
+              sum = new ListNode(0);
+            
+          return sum;
+      }
+
+
+  public:
+      ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+          l1 = reverse(l1);
+          l2 = reverse(l2);
+          ListNode* sum = new ListNode(0);
+          ListNode* current = sum;
+
+          while (l1 != nullptr or l2 != nullptr) {
+              int l1val = (l1 == nullptr? 0 : l1->val);
+              int l2val = (l2 == nullptr? 0 : l2->val);
+              current->val += l1val+l2val;
+
+              current->next = new ListNode(current->val > 9? 1 : 0);
+              current->val %= 10;
+              current = current->next;
+              l1 = (l1 == nullptr? nullptr : l1->next);
+              l2 = (l2 == nullptr? nullptr : l2->next);
+          }
+        
+          sum = reverse(sum);
+          sum = skipzeroes(sum);
+
+          return sum;
+      }
+  };
+#+END_SRC
+** 453. Minimum moves to equal array elements
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      int minMoves(vector<int>& nums) {
+          int minimum = nums[0];
+          for (int elem : nums)
+              if (elem < minimum)
+                  minimum = elem;
+        
+          int moves = 0;
+          for (int elem : nums)
+              moves += elem-minimum;
+          return moves;
+      }
+  };
+#+END_SRC
+** TODO 460. LFU Cache

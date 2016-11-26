@@ -2978,6 +2978,15 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
       }
   };
 #+END_SRC
+** 326. Power of three
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+      bool isPowerOfThree(int n) {
+          return n>0 && (n==1 || (n%3==0 && isPowerOfThree(n/3)));
+      }
+  };
+#+END_SRC
 ** 343. Integer Break
 Using the AM-GM inequality.
 #+BEGIN_SRC cpp

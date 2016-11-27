@@ -2992,7 +2992,6 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
       for (int i=0; i<imatrix.size(); i++) {
         for (int j=0; j<imatrix[0].size(); j++) {
           imatrix[i][j] = triangle(access(imatrix, i-1, j), access(imatrix, i, j-1), access(imatrix,i-1,j-1), access(imatrix, i, j));
-          cout << imatrix[i][j] << " ";
           if (max < imatrix[i][j])
             max = imatrix[i][j];
         }

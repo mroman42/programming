@@ -2757,6 +2757,30 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
       }
   };
 #+END_SRC
+** 203. Remove Linked list elements
+#+BEGIN_SRC cpp
+  class Solution {
+  public:
+    ListNode* removeElements(ListNode* head, int val) {
+      ListNode* current = head;
+      ListNode* previous = nullptr;
+        
+      while(current != nullptr) {
+	if (current->val == val) {
+	  if (previous != nullptr)
+	    previous->next = current->next;
+	  else
+	    head = head->next;
+	}
+	else
+	  previous = current;
+	current = current->next;
+      }
+        
+      return head;
+    }
+  };
+#+END_SRC
 ** 215. Kth Largest Element in Array
 #+BEGIN_SRC cpp
   class Solution {
@@ -3182,4 +3206,3 @@ Using the AM-GM inequality.
       }
   };
 #+END_SRC
-** TODO 460. LFU Cache

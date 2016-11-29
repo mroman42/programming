@@ -2438,6 +2438,36 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
   };
 #+END_SRC
 ** DONE 33. Search in rotated sorted array
+** 56. Merge Intervals
+   #+BEGIN_SRC cpp
+     bool compareIntervals(const Interval& a, const Interval& b) {
+       return a.start < b.start;
+     }
+
+     class Solution {
+     public:
+       vector<Interval> merge(vector<Interval>& intervals) {
+         vector<Interval> solution;
+         if (intervals.size() == 0)
+   	return solution;
+         sort(intervals.begin(), intervals.end(), compareIntervals);
+
+         int start = intervals[0].start;
+         int end = intervals[0].end;
+         for (Interval i : intervals) {
+   	if (i.start > end) {
+             solution.push_back(Interval(start,end));
+             start = i.start;
+   	}
+
+   	end = max(end,i.end);
+         }
+
+         solution.push_back(Interval(start,end));
+         return solution;
+       }
+     };
+   #+END_SRC
 ** 66. Plus One
 #+BEGIN_SRC cpp
   class Solution {
@@ -2678,35 +2708,59 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
     }
   };
 #+END_SRC
+** 119. Pascal's Triangle II
+   #+BEGIN_SRC cpp
+     class Solution {
+     public:
+       vector<int> getRow(int rowIndex) {
+         int k = rowIndex;
+         vector<int> row {1};
+
+         for (int i=0; i<k; i++) {
+   	int prev = row[0];
+   	for (int j=1; j<row.size(); j++) {
+   	  int newprev = row[j];
+   	  row[j] = prev + row[j];
+   	  prev = newprev;
+   	}
+   	row.push_back(1);
+         }
+
+         return row;
+       }
+     };
+   #+END_SRC
+
 ** 121. Best Time to Buy and Sell Stock
-#+BEGIN_SRC cpp
-  class Solution {
-  public:
-      int maxProfit(vector<int>& prices) {
-          if (prices.size() == 0)
-              return 0;
-        
-          int max = prices[0];
-          int min = prices[0];
-          int profit = 0;
-        
-          for (int p : prices) {
-              if (p<min) {
-                  min = p;
-                  max = p;
-              }
-              if (p>max) {
-                  max = p;
-              }
-            
-              if (max-min > profit)
-                  profit = max-min;
-          }
-        
-          return profit;
-      }
-  };
-#+END_SRC
+   #+BEGIN_SRC cpp
+     class Solution {
+     public:
+       int maxProfit(vector<int>& prices) {
+         if (prices.size() == 0)
+   	return 0;
+
+         int max = prices[0];
+         int min = prices[0];
+         int profit = 0;
+
+         for (int p : prices) {
+   	if (p<min) {
+   	  min = p;
+   	  max = p;
+   	}
+   	if (p>max) {
+   	  max = p;
+   	}
+
+   	if (max-min > profit)
+   	  profit = max-min;
+         }
+
+         return profit;
+       }
+     };
+   #+END_SRC
+
 ** 133. Clone Graph
 #+BEGIN_SRC cpp
   class Solution {

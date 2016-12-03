@@ -2399,21 +2399,22 @@ int main(){
 
 * Interview problems
 ** Google example interview
-Taken from [[https://www.youtube.com/watch?v=XKu_SEDAykw][this youtube video]]:
+   Taken from [[https://www.youtube.com/watch?v=XKu_SEDAykw][this youtube video]]:
 
-#+BEGIN_SRC cpp
-  bool HasPairWithSum (vector<int>& numbers, int sum) {
-    unordered_set<int> complements;
-  
-    for (int n : numbers) {
-      if (complements.find(n) != complements.end())
-        return true;
-      complements.add(sum-n);
-    }
+   #+BEGIN_SRC cpp
+     bool HasPairWithSum (vector<int>& numbers, int sum) {
+       unordered_set<int> complements;
 
-    return false;
-  }
-#+END_SRC
+       for (int n : numbers) {
+         if (complements.find(n) != complements.end())
+   	return true;
+         complements.add(sum-n);
+       }
+
+       return false;
+     }
+   #+END_SRC
+
 * Python Kung-fu
 From the [[https://github.com/PythonGranada/python-kung-fu/][Python Kung-fu repository]].
 
@@ -2581,7 +2582,7 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
          int end = intervals[0].end;
          for (Interval i : intervals) {
    	if (i.start > end) {
-             solution.push_back(Interval(start,end));
+   	  solution.push_back(Interval(start,end));
              start = i.start;
    	}
 
@@ -2593,6 +2594,7 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
        }
      };
    #+END_SRC
+
 ** 66. Plus One
 #+BEGIN_SRC cpp
   class Solution {
@@ -2887,31 +2889,32 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
    #+END_SRC
 
 ** 133. Clone Graph
-#+BEGIN_SRC cpp
-  class Solution {
-  private:
+  #+BEGIN_SRC cpp
+    class Solution {
+    private:
       unordered_map<int, UndirectedGraphNode*> cloned;
-  public:
+    public:
       UndirectedGraphNode* cloneGraph(UndirectedGraphNode* node) {
-          if (node == nullptr)
-              return nullptr;
+        if (node == nullptr)
+  	return nullptr;
 
-          int label = node->label;
+        int label = node->label;
 
-          if (cloned.find(label) != cloned.end()) 
-              return cloned[label];
+        if (cloned.find(label) != cloned.end()) 
+  	return cloned[label];
 
-          UndirectedGraphNode* newnode = new UndirectedGraphNode(label);
-          cloned[label] = newnode;
-        
-          for (UndirectedGraphNode* neighbor : node->neighbors)
-              newnode->neighbors.push_back(cloneGraph(neighbor));
-        
-          return newnode;
-    
+        UndirectedGraphNode* newnode = new UndirectedGraphNode(label);
+        cloned[label] = newnode;
+
+        for (UndirectedGraphNode* neighbor : node->neighbors)
+  	newnode->neighbors.push_back(cloneGraph(neighbor));
+
+        return newnode;
+
       }
-  };
-#+END_SRC
+    };
+  #+END_SRC
+
 ** 136. Single number
 #+BEGIN_SRC cpp
   class Solution {
@@ -2925,7 +2928,7 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
   };
 #+END_SRC
 ** 141. Linked list cycle
-#+BEGIN_SRC cpp
+  #+BEGIN_SRC cpp
   class Solution {
   public:
     bool hasCycle(ListNode *head) {
@@ -2942,7 +2945,7 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
       return false;
     }
   };
-#+END_SRC
+  #+END_SRC
 ** 153. Find Minimum in Rotated Sorted Array
 #+BEGIN_SRC cpp
   class Solution {
@@ -3120,6 +3123,7 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
       }
   };
 #+END_SRC
+
 ** 219. Contains Duplicate II
 #+BEGIN_SRC cpp
   class Solution {

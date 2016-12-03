@@ -3226,6 +3226,26 @@ Using a vector as a sort of a hash, running in ${\cal O}(n)$.
     }
   };
 #+END_SRC
+
+** 226. Invert Binary Tree
+   #+BEGIN_SRC cpp
+     class Solution {
+     public:
+       TreeNode* invertTree(TreeNode* root) {
+         if (root == nullptr) return root;
+
+         TreeNode* swap = root->left;
+         root->left = root->right;
+         root->right = swap;
+
+         root->left = invertTree(root->left);
+         root->right = invertTree(root->right);
+
+         return root;
+       }
+     };
+   #+END_SRC
+
 ** 229. Majority Element II
 #+BEGIN_SRC cpp
   class Solution {
@@ -3510,3 +3530,4 @@ Using the AM-GM inequality.
       }
   };
 #+END_SRC
+

@@ -2272,6 +2272,131 @@ int main(){
     return 0;
 }
 #+END_SRC
+** HourRank 15
+*** Cats and a mouse
+    #+BEGIN_SRC cpp
+      using namespace std;
+
+      int main(){
+        int q;
+        cin >> q;
+        for(int a0 = 0; a0 < q; a0++){
+          int x;
+          int y;
+          int z;
+          cin >> x >> y >> z;
+        
+          if (abs(z-x) < abs(z-y))
+    	cout << "Cat A";
+          else if (abs(z-x) > abs(z-y))
+    	cout << "Cat B";
+          else
+    	cout << "Mouse C";
+          cout << endl;
+        }
+    
+
+        
+        return 0;
+      }
+    #+END_SRC
+*** Gaming array sum
+    #+BEGIN_SRC cpp
+      #include <vector>
+      #include <climits>
+      #include <cstring>
+      #include <cstdlib>
+      #include <fstream>
+      #include <numeric>
+      #include <sstream>
+      #include <iostream>
+      #include <algorithm>
+      #include <unordered_map>
+
+      using namespace std;
+
+
+      int main(){
+        int g;
+        cin >> g;
+        for(int a0 = 0; a0 < g; a0++){
+          int n;
+          cin >> n;
+          vector<int> numbers;
+          for (int i=0; i<n; i++) {
+    	int read; cin >> read;
+    	numbers.push_back(read);   
+          }
+        
+          int counter = 0;
+          int max = 0;
+          for (int j=0; j<n; j++) {
+    	if (numbers[j] > max) {
+    	  counter++;
+    	  max = numbers[j];
+    	}
+          }
+        
+          if (counter % 2 == 0)
+    	cout << "ANDY";
+          else
+    	cout << "BOB";
+          cout << endl;
+        }
+        return 0;
+      }
+    #+END_SRC
+*** Tara's Beautiful Permutations
+    #+BEGIN_SRC cpp
+      #include <cmath>
+      #include <cstdio>
+      #include <vector>
+      #include <unordered_set>
+      #include <iostream>
+      #include <algorithm>
+      using namespace std;
+      const int MOD = 1000000007;
+      typedef long long int lli;
+
+      lli phi(vector< vector<lli> >& results, int n, int k) {
+        if (results[n][k] != -1)
+          return results[n][k];
+    
+        lli sol;
+        if (k == 0)
+          sol = (n * phi(results,n-1,0)) % MOD;
+        else {
+          lli u = phi(results,n,k-1);
+          sol = ((u + (u%2)*MOD)/2 - phi(results,n-1,k-1) + MOD) % MOD;
+        }
+        results[n][k] = sol;
+        return sol;
+      }
+
+      int main() {
+        vector< vector<lli> > results(2001,vector<lli>(1001,-1));
+        results[0][0] = 1;
+    
+        int cases; cin >> cases;
+        for (int i=0; i<cases; i++) {
+          unordered_set<int> counter;
+          int k = 0;
+          int n; cin >> n;
+          for (int i=0; i<n; i++) {
+    	int read; cin >> read;
+    	if (counter.find(read) != counter.end())
+    	  k++;
+    	else
+    	  counter.insert(read);
+          }
+        
+          cout << phi(results,n,k) << endl;
+        }
+    
+        return 0;
+      }
+    #+END_SRC
+
 * Interview problems
 ** Google example interview
 Taken from [[https://www.youtube.com/watch?v=XKu_SEDAykw][this youtube video]]:

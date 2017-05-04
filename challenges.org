@@ -1,318 +1,7 @@
 #+TITLE: Programming Challenges
 #+AUTHOR: Mario Román
-
-* Algorithms
-** Sorting
-*** Bubble sort
-An average performance of ${\cal O}(n^2)$.
-
-**** C++ Implementation
-#+BEGIN_SRC cpp :cmdline <<< '9 5 7 3 6 2 8 4 1'
-  #include<iostream>
-  #include<vector>
-  using namespace std;
-
-  void bubblesort(vector<int>& arr) {
-    for (unsigned i=0; i<arr.size(); i++) {
-      for (unsigned j=0; j<arr.size()-i-1; j++) {
-        if (arr[j] > arr[j+1]) {
-          int swap = arr[j];
-          arr[j] = arr[j+1];
-          arr[j+1] = swap;
-        }
-      }
-    }
-  }
-
-
-  int main() {
-    vector<int> numbers;
-    int read;
-
-    while (cin >> read) {
-      numbers.push_back(read);
-    }
-
-    bubblesort(numbers);
-
-    for (int n : numbers) {
-      cout << n << " ";
-    }
-  }
-#+END_SRC
-
-#+RESULTS:
-: 1 2 3 4 5 6 7 8 9
-
-*** Quicksort
-An average performance of ${\cal O}(n \log(n))$, but the worst-case performance is of ${\cal O}(n^2)$.
-
-**** C++ Implementation
-:cmdline <<< '9 5 7 3 6 2 8 4 1'
-#+BEGIN_SRC cpp :cmdline <<< '7 6 5 4 3 2 1'
-  #include<iostream>
-  #include<vector>
-  using namespace std;
-
-  void quicksort(vector<int>& numbers, int left, int right) {
-    if (left >= right)
-      return;
-
-    int i = left+1;
-    int j = right;
-    int pivot = numbers[left];
-
-    while (i <= j) {
-      while (numbers[i] < pivot)
-        i++;
-      while (numbers[j] > pivot)
-        j--;
-      if (i < j) {
-        int swap = numbers[i];
-        numbers[i] = numbers[j];
-        numbers[j] = swap;
-      }
-    }
-
-    numbers[left] = numbers[j];
-    numbers[j] = pivot;
-    quicksort(numbers, left, j-1);
-    quicksort(numbers, j+1, right);
-  }
-
-  int main() {
-    int read;
-    vector<int> numbers;
-    while (cin >> read)
-      numbers.push_back(read);
-
-    quicksort(numbers,0,numbers.size()-1);
-
-    for (int n : numbers)
-      cout << n << " ";
-  }
-#+END_SRC
-
-#+RESULTS:
-: 1 2 3 4 5 6 7
-
-**** Haskell Implementation
-#+BEGIN_SRC haskell :results output
-  input :: [Int]
-  input = [9,5,8,3,7,4,1,2,6]
-
-  quicksort :: (Ord a) => [a] -> [a]
-  quicksort [] = []
-  quicksort (x:xs) =
-    quicksort (filter (<=x) xs) ++
-    [x] ++
-    quicksort (filter (>=x) xs)
-
-  main :: IO ()
-  main = do
-    print $ quicksort input
-#+END_SRC
-
-#+RESULTS:
-: [1,2,3,4,5,6,7,8,9]
-
-*** Mergesort
-**** C++ Implementation
-Mergesort has an average performance of ${\cal O}(n \log(n))$, where $n$ is the size of the arrray.
-We can compute that visualizing a diagram of mergesort. To merge a level into other is lineal
-in time, and to sort a level depends on the numbers of levels below it; if we think of the
-diagram as a tree, it has $\log(n)$ levels.
-#+BEGIN_SRC cpp :cmdline <<< '8 6 2 4 7 1 5 9 3'
-  #include<iostream>
-  #include<vector>
-  using namespace std;
-
-  void merge(vector<int>& arr, int left, int middle, int right) {
-    vector<int> auxiliar;
-    for (int i=left; i<right; i++)
-      auxiliar.push_back(arr[i]);
-
-    int rel_left = left-left;
-    int rel_right = right-left;
-    int rel_middle = middle-left;
-    int i = rel_left;
-    int j = rel_middle;
-    int a = left;
-
-    while (i < rel_middle and j < rel_right) {
-      if (auxiliar[i] < auxiliar[j]) {
-        arr[a] = auxiliar[i];
-        i++; a++;
-      }
-      else {
-        arr[a] = auxiliar[j];
-        j++; a++;
-      }
-    }
-
-    while (i < rel_middle) {
-      arr[a] = auxiliar[i];
-      i++; a++;
-    }
-
-    while (j < rel_right) {
-      arr[a] = auxiliar[j];
-      j++; a++;
-    }
-  }
-
-  void mergesort(vector<int>& arr, int left, int right) {
-    if (left >= right-1)
-      return;
-
-    int middle = (left+right)/2;
-    mergesort(arr, left, middle);
-    mergesort(arr, middle, right);
-    merge(arr, left, middle, right);
-  }
-
-  int main() {
-    vector<int> numbers;
-    int read;
-    while (cin >> read)
-      numbers.push_back(read);
-
-    mergesort(numbers, 0, numbers.size());
-
-    for (int n : numbers) {
-      cout << n << " ";
-    }
-  }
-
-#+END_SRC
-
-#+RESULTS:
-: 1 2 3 4 5 6 7 8 9
-
-**** Haskell implementation
-#+BEGIN_SRC haskell :results output
-  merge :: (Ord a) => [a] -> [a] -> [a]
-  merge [] ys = ys
-  merge xs [] = xs
-  merge (x:xs) (y:ys)
-      | x < y = x:(merge xs (y:ys))
-      | otherwise = y:(merge (x:xs) ys)
-
-  mergesort :: (Ord a) => [a] -> [a]
-  mergesort [] = []
-  mergesort [x] = [x]
-  mergesort xs = merge (mergesort fs) (mergesort ls)
-      where (fs,ls) = splitAt middle xs
-            middle = div (length xs) 2
-
-  main :: IO ()
-  main = print $ mergesort input
-  
-  input :: [Int]
-  input = [9,5,8,2,4,7,6,1,3,10]
-#+END_SRC
-
-#+RESULTS:
-: [1,2,3,4,5,6,7,8,9,10]
-
-*** Heapsort
-It runs in ${\cal O}(n \log n)$.
-**** Haskell library implementation
-#+BEGIN_SRC haskell :results output
-import Data.Heap as Heap
-
-heapsort :: (Ord a) => [a] -> [a]
-heapsort = Heap.sort
-
-main :: IO ()
-main = print $ heapsort input
-
-input :: [Int]
-input = [7,1,4,9,2,6,3,5,8]
-#+END_SRC
-
-#+RESULTS:
-: [1,2,3,4,5,6,7,8,9]
-
-** Data Structures
-*** TODO Monoids and Finger Trees
-**** Finger Trees
-This code is based upon the article: [[http://apfelmus.nfshost.com/articles/monoid-fingertree.html][Monoids and fingertrees]] by Apfelmus.
-
-#+BEGIN_SRC haskell :results output
-  data Tree v a = Leaf v a
-                | Branch v (Tree v a) (Tree v a)
-
-  toList :: Tree v a -> [a]
-  toList (Leaf _ x) = [x]
-  toList (Branch _ xt yt) = toList xt ++ toList yt
-
-  tag :: Tree v a -> v
-  tag (Leaf v _) = v
-  tag (Branch v _ _) = v
-
-
-  -- Size trees with special constructors
-  type Size = Int
-
-  leaf :: a -> Tree Size a
-  leaf x = Leaf 1 x
-
-  branch :: Tree Size a -> Tree Size a -> Tree Size a
-  branch xt yt = Branch (tag xt + tag yt) xt yt
-
-  (!) :: Tree Size a -> Int -> a
-  (!) (Leaf _ a) 0 = a
-  (!) (Branch _ xt yt) n 
-      | n < tag xt = xt ! n
-      | otherwise  = yt ! (n - tag xt)
-
-  fromList :: [a] -> Tree Size a
-  fromList [x] = leaf x
-  fromList xs = branch (fromList fh) (fromList sh)
-      where
-        (fh,sh) = splitAt (length xs `div` 2) xs
-
-
-  -- Priority queue
-  type Priority = Int
-
-  leafp :: a -> Priority -> Tree Priority a
-  leafp x p = Leaf p x
-
-  branchp :: Tree Priority a -> Tree Priority a -> Tree Priority a
-  branchp lt rt = Branch (min (tag lt) (tag rt)) lt rt
-
-  winner :: Tree Priority a -> a
-  winner (Leaf _ a) = a
-  winner t@(Branch _ x y)
-    | tag t == tag x = winner x
-    | otherwise      = winner y
-
-  fromListp :: [(a,Priority)] -> Tree Priority a
-  fromListp [(x,p)] = leafp x p
-  fromListp xs = branchp (fromListp fh) (fromListp sh)
-      where
-        (fh,sh) = splitAt (length xs `div` 2) xs
-
-
-  -- Example main
-  main :: IO ()
-  main = do
-    print $ fromList [7,5,2,6,4,9,1,3,8] ! 5
-    print $ winner $ fromListp [("a",5),("b",7),("c",3),("d",4)]
-#+END_SRC
-
-#+RESULTS:
-: 9
-: c
-
-**** Monoidal abstraction
-We can abstract this into a monoid:
-
-#+BEGIN_SRC haskell :results output
-
-#+END_SRC
+#+OPTIONS: num:nil
+#+SETUPFILE: html.setup
 
 * Hackerrank
 ** Data Structures
@@ -2396,135 +2085,6 @@ int main(){
         return 0;
       }
     #+END_SRC
-
-* Interview problems
-** Google example interview
-   Taken from [[https://www.youtube.com/watch?v=XKu_SEDAykw][this youtube video]]:
-
-   #+BEGIN_SRC cpp
-     bool HasPairWithSum (vector<int>& numbers, int sum) {
-       unordered_set<int> complements;
-
-       for (int n : numbers) {
-         if (complements.find(n) != complements.end())
-   	return true;
-         complements.add(sum-n);
-       }
-
-       return false;
-     }
-   #+END_SRC
-
-* Python Kung-fu
-From the [[https://github.com/PythonGranada/python-kung-fu/][Python Kung-fu repository]].
-
-** 0. String permutation
-Using a vector as a sort of a hash, running in ${\cal O}(n)$.
-#+BEGIN_SRC cpp :cmdline <<< 'asdf fsda'
-  #include<vector>
-  #include<string>
-  #include<iostream>
-  using namespace std;
-
-  bool is_permutation(string a, string b) {
-      vector<int> counter(26,0);
-      for (char c : a)
-          counter[c-'a']++;
-      for (char c : b)
-          counter[c-'a']--;
-
-      for (int ocurrences : counter)
-          if (ocurrences != 0)
-              return false;
-
-      return true;
-  }
-
-  int main() {
-    string a,b;
-    cin >> a >> b;
-  
-    // Checking that the two sizes are equal discards a lot of
-    // edge cases.
-    if (a.size() == b.size() and is_permutation(a,b))
-      cout << "Permutation";
-    else
-      cout << "Not a permutation";
-  }
-#+END_SRC
-
-#+RESULTS:
-: Permutation
-
-** 1. Unique characters
-*** With a boolean vector
-#+BEGIN_SRC cpp :cmdline <<< 'afsgdf'
-  #include<vector>
-  #include<iostream>
-  #include<string>
-  #include<stdint.h>
-  using namespace std;
-
-  bool unique_chars(string str) {
-    if (str.size() > 26)
-      return false;
-
-    int32_t counter = 0;
-    for (char c : str)
-      if ((counter & (1 << (c-'a'))) != 0)
-        return false;
-      else
-        counter |= (1 << (c-'a'));
-    return true;
-  }
-
-  int main() {
-    string str;
-    cin >> str;
-
-    if (unique_chars(str))
-      cout << "Unique characters";
-    else
-      cout << "Repeated characters";
-  }
-#+END_SRC
-
-#+RESULTS:
-: Repeated characters
-
-*** Without additional data structures
-#+BEGIN_SRC cpp :cmdline <<< 'afsgdf'
-  #include<vector>
-  #include<algorithm>
-  #include<iostream>
-  using namespace std;
-
-  bool unique_chars(string str) {
-    if (str.size() > 26)
-      return false;
-    
-    make_heap(str.begin(), str.end());
-    sort_heap(str.begin(), str.end());
-    for (int i=0; i<str.size()-1; i++)
-      if (str[i] == str[i+1])
-        return false;
-
-    return true;
-  }
-
-  int main() {
-    string str;
-    cin >> str;
-
-    if (unique_chars(str))
-      cout << "Unique characters";
-    else
-      cout << "Repeated characters";
-  }
-#+END_SRC
-
-#+RESULTS:
-: Repeated characters
 * Leetcode
 ** 31. Next permutation
 #+BEGIN_SRC cpp
@@ -3529,5 +3089,445 @@ Using the AM-GM inequality.
           return moves;
       }
   };
+#+END_SRC
+
+* Interview problems
+** Google example interview
+Taken from [[https://www.youtube.com/watch?v=XKu_SEDAykw][this youtube video]]:
+
+#+BEGIN_SRC cpp
+  bool HasPairWithSum (vector<int>& numbers, int sum) {
+    unordered_set<int> complements;
+
+    for (int n : numbers) {
+      if (complements.find(n) != complements.end())
+	return true;
+      complements.add(sum-n);
+    }
+
+    return false;
+  }
+#+END_SRC
+* Python Kung-fu
+From the [[https://github.com/PythonGranada/python-kung-fu/][Python Kung-fu repository]].
+
+** 0. String permutation
+Using a vector as a sort of a hash, running in ${\cal O}(n)$.
+#+BEGIN_SRC cpp :cmdline <<< 'asdf fsda'
+  #include<vector>
+  #include<string>
+  #include<iostream>
+  using namespace std;
+
+  bool is_permutation(string a, string b) {
+      vector<int> counter(26,0);
+      for (char c : a)
+          counter[c-'a']++;
+      for (char c : b)
+          counter[c-'a']--;
+
+      for (int ocurrences : counter)
+          if (ocurrences != 0)
+              return false;
+
+      return true;
+  }
+
+  int main() {
+    string a,b;
+    cin >> a >> b;
+  
+    // Checking that the two sizes are equal discards a lot of
+    // edge cases.
+    if (a.size() == b.size() and is_permutation(a,b))
+      cout << "Permutation";
+    else
+      cout << "Not a permutation";
+  }
+#+END_SRC
+
+#+RESULTS:
+: Permutation
+
+** 1. Unique characters
+*** With a boolean vector
+#+BEGIN_SRC cpp :cmdline <<< 'afsgdf'
+  #include<vector>
+  #include<iostream>
+  #include<string>
+  #include<stdint.h>
+  using namespace std;
+
+  bool unique_chars(string str) {
+    if (str.size() > 26)
+      return false;
+
+    int32_t counter = 0;
+    for (char c : str)
+      if ((counter & (1 << (c-'a'))) != 0)
+        return false;
+      else
+        counter |= (1 << (c-'a'));
+    return true;
+  }
+
+  int main() {
+    string str;
+    cin >> str;
+
+    if (unique_chars(str))
+      cout << "Unique characters";
+    else
+      cout << "Repeated characters";
+  }
+#+END_SRC
+
+#+RESULTS:
+: Repeated characters
+
+*** Without additional data structures
+#+BEGIN_SRC cpp :cmdline <<< 'afsgdf'
+  #include<vector>
+  #include<algorithm>
+  #include<iostream>
+  using namespace std;
+
+  bool unique_chars(string str) {
+    if (str.size() > 26)
+      return false;
+    
+    make_heap(str.begin(), str.end());
+    sort_heap(str.begin(), str.end());
+    for (int i=0; i<str.size()-1; i++)
+      if (str[i] == str[i+1])
+        return false;
+
+    return true;
+  }
+
+  int main() {
+    string str;
+    cin >> str;
+
+    if (unique_chars(str))
+      cout << "Unique characters";
+    else
+      cout << "Repeated characters";
+  }
+#+END_SRC
+
+#+RESULTS:
+: Repeated characters
+* Algorithms
+** Sorting
+*** Bubble sort
+An average performance of ${\cal O}(n^2)$.
+
+**** C++ Implementation
+#+BEGIN_SRC cpp :cmdline <<< '9 5 7 3 6 2 8 4 1'
+  #include<iostream>
+  #include<vector>
+  using namespace std;
+
+  void bubblesort(vector<int>& arr) {
+    for (unsigned i=0; i<arr.size(); i++) {
+      for (unsigned j=0; j<arr.size()-i-1; j++) {
+        if (arr[j] > arr[j+1]) {
+          int swap = arr[j];
+          arr[j] = arr[j+1];
+          arr[j+1] = swap;
+        }
+      }
+    }
+  }
+
+
+  int main() {
+    vector<int> numbers;
+    int read;
+
+    while (cin >> read) {
+      numbers.push_back(read);
+    }
+
+    bubblesort(numbers);
+
+    for (int n : numbers) {
+      cout << n << " ";
+    }
+  }
+#+END_SRC
+
+#+RESULTS:
+: 1 2 3 4 5 6 7 8 9
+
+*** Quicksort
+An average performance of ${\cal O}(n \log(n))$, but the worst-case performance is of ${\cal O}(n^2)$.
+
+**** C++ Implementation
+:cmdline <<< '9 5 7 3 6 2 8 4 1'
+#+BEGIN_SRC cpp :cmdline <<< '7 6 5 4 3 2 1'
+  #include<iostream>
+  #include<vector>
+  using namespace std;
+
+  void quicksort(vector<int>& numbers, int left, int right) {
+    if (left >= right)
+      return;
+
+    int i = left+1;
+    int j = right;
+    int pivot = numbers[left];
+
+    while (i <= j) {
+      while (numbers[i] < pivot)
+        i++;
+      while (numbers[j] > pivot)
+        j--;
+      if (i < j) {
+        int swap = numbers[i];
+        numbers[i] = numbers[j];
+        numbers[j] = swap;
+      }
+    }
+
+    numbers[left] = numbers[j];
+    numbers[j] = pivot;
+    quicksort(numbers, left, j-1);
+    quicksort(numbers, j+1, right);
+  }
+
+  int main() {
+    int read;
+    vector<int> numbers;
+    while (cin >> read)
+      numbers.push_back(read);
+
+    quicksort(numbers,0,numbers.size()-1);
+
+    for (int n : numbers)
+      cout << n << " ";
+  }
+#+END_SRC
+
+#+RESULTS:
+: 1 2 3 4 5 6 7
+
+**** Haskell Implementation
+#+BEGIN_SRC haskell :results output
+  input :: [Int]
+  input = [9,5,8,3,7,4,1,2,6]
+
+  quicksort :: (Ord a) => [a] -> [a]
+  quicksort [] = []
+  quicksort (x:xs) =
+    quicksort (filter (<=x) xs) ++
+    [x] ++
+    quicksort (filter (>=x) xs)
+
+  main :: IO ()
+  main = do
+    print $ quicksort input
+#+END_SRC
+
+#+RESULTS:
+: [1,2,3,4,5,6,7,8,9]
+
+*** Mergesort
+**** C++ Implementation
+Mergesort has an average performance of ${\cal O}(n \log(n))$, where $n$ is the size of the arrray.
+We can compute that visualizing a diagram of mergesort. To merge a level into other is lineal
+in time, and to sort a level depends on the numbers of levels below it; if we think of the
+diagram as a tree, it has $\log(n)$ levels.
+#+BEGIN_SRC cpp :cmdline <<< '8 6 2 4 7 1 5 9 3'
+  #include<iostream>
+  #include<vector>
+  using namespace std;
+
+  void merge(vector<int>& arr, int left, int middle, int right) {
+    vector<int> auxiliar;
+    for (int i=left; i<right; i++)
+      auxiliar.push_back(arr[i]);
+
+    int rel_left = left-left;
+    int rel_right = right-left;
+    int rel_middle = middle-left;
+    int i = rel_left;
+    int j = rel_middle;
+    int a = left;
+
+    while (i < rel_middle and j < rel_right) {
+      if (auxiliar[i] < auxiliar[j]) {
+        arr[a] = auxiliar[i];
+        i++; a++;
+      }
+      else {
+        arr[a] = auxiliar[j];
+        j++; a++;
+      }
+    }
+
+    while (i < rel_middle) {
+      arr[a] = auxiliar[i];
+      i++; a++;
+    }
+
+    while (j < rel_right) {
+      arr[a] = auxiliar[j];
+      j++; a++;
+    }
+  }
+
+  void mergesort(vector<int>& arr, int left, int right) {
+    if (left >= right-1)
+      return;
+
+    int middle = (left+right)/2;
+    mergesort(arr, left, middle);
+    mergesort(arr, middle, right);
+    merge(arr, left, middle, right);
+  }
+
+  int main() {
+    vector<int> numbers;
+    int read;
+    while (cin >> read)
+      numbers.push_back(read);
+
+    mergesort(numbers, 0, numbers.size());
+
+    for (int n : numbers) {
+      cout << n << " ";
+    }
+  }
+
+#+END_SRC
+
+#+RESULTS:
+: 1 2 3 4 5 6 7 8 9
+
+**** Haskell implementation
+#+BEGIN_SRC haskell :results output
+  merge :: (Ord a) => [a] -> [a] -> [a]
+  merge [] ys = ys
+  merge xs [] = xs
+  merge (x:xs) (y:ys)
+      | x < y = x:(merge xs (y:ys))
+      | otherwise = y:(merge (x:xs) ys)
+
+  mergesort :: (Ord a) => [a] -> [a]
+  mergesort [] = []
+  mergesort [x] = [x]
+  mergesort xs = merge (mergesort fs) (mergesort ls)
+      where (fs,ls) = splitAt middle xs
+            middle = div (length xs) 2
+
+  main :: IO ()
+  main = print $ mergesort input
+  
+  input :: [Int]
+  input = [9,5,8,2,4,7,6,1,3,10]
+#+END_SRC
+
+#+RESULTS:
+: [1,2,3,4,5,6,7,8,9,10]
+
+*** Heapsort
+It runs in ${\cal O}(n \log n)$.
+**** Haskell library implementation
+#+BEGIN_SRC haskell :results output
+import Data.Heap as Heap
+
+heapsort :: (Ord a) => [a] -> [a]
+heapsort = Heap.sort
+
+main :: IO ()
+main = print $ heapsort input
+
+input :: [Int]
+input = [7,1,4,9,2,6,3,5,8]
+#+END_SRC
+
+#+RESULTS:
+: [1,2,3,4,5,6,7,8,9]
+
+** Data Structures
+*** TODO Monoids and Finger Trees
+**** Finger Trees
+This code is based upon the article: [[http://apfelmus.nfshost.com/articles/monoid-fingertree.html][Monoids and fingertrees]] by Apfelmus.
+
+#+BEGIN_SRC haskell :results output
+  data Tree v a = Leaf v a
+                | Branch v (Tree v a) (Tree v a)
+
+  toList :: Tree v a -> [a]
+  toList (Leaf _ x) = [x]
+  toList (Branch _ xt yt) = toList xt ++ toList yt
+
+  tag :: Tree v a -> v
+  tag (Leaf v _) = v
+  tag (Branch v _ _) = v
+
+
+  -- Size trees with special constructors
+  type Size = Int
+
+  leaf :: a -> Tree Size a
+  leaf x = Leaf 1 x
+
+  branch :: Tree Size a -> Tree Size a -> Tree Size a
+  branch xt yt = Branch (tag xt + tag yt) xt yt
+
+  (!) :: Tree Size a -> Int -> a
+  (!) (Leaf _ a) 0 = a
+  (!) (Branch _ xt yt) n 
+      | n < tag xt = xt ! n
+      | otherwise  = yt ! (n - tag xt)
+
+  fromList :: [a] -> Tree Size a
+  fromList [x] = leaf x
+  fromList xs = branch (fromList fh) (fromList sh)
+      where
+        (fh,sh) = splitAt (length xs `div` 2) xs
+
+
+  -- Priority queue
+  type Priority = Int
+
+  leafp :: a -> Priority -> Tree Priority a
+  leafp x p = Leaf p x
+
+  branchp :: Tree Priority a -> Tree Priority a -> Tree Priority a
+  branchp lt rt = Branch (min (tag lt) (tag rt)) lt rt
+
+  winner :: Tree Priority a -> a
+  winner (Leaf _ a) = a
+  winner t@(Branch _ x y)
+    | tag t == tag x = winner x
+    | otherwise      = winner y
+
+  fromListp :: [(a,Priority)] -> Tree Priority a
+  fromListp [(x,p)] = leafp x p
+  fromListp xs = branchp (fromListp fh) (fromListp sh)
+      where
+        (fh,sh) = splitAt (length xs `div` 2) xs
+
+
+  -- Example main
+  main :: IO ()
+  main = do
+    print $ fromList [7,5,2,6,4,9,1,3,8] ! 5
+    print $ winner $ fromListp [("a",5),("b",7),("c",3),("d",4)]
+#+END_SRC
+
+#+RESULTS:
+: 9
+: c
+
+**** Monoidal abstraction
+We can abstract this into a monoid:
+
+#+BEGIN_SRC haskell :results output
+
 #+END_SRC
 

@@ -1080,28 +1080,6 @@ int main(){
         return 0;
       }
     #+END_SRC
-* Leetcode
-** DONE 84. Largest Rectangle in Histogram
-** DONE 412. Fizz Buzz
-** DONE 441. Arranging Coins
-* Interview problems
-** Google example interview
-Taken from [[https://www.youtube.com/watch?v=XKu_SEDAykw][this youtube video]]:
-
-#+BEGIN_SRC cpp
-  bool HasPairWithSum (vector<int>& numbers, int sum) {
-    unordered_set<int> complements;
-
-    for (int n : numbers) {
-      if (complements.find(n) != complements.end())
-        return true;
-      complements.add(sum-n);
-    }
-
-    return false;
-  }
-#+END_SRC
-
 * Python Kung-fu
 From the [[https://github.com/PythonGranada/python-kung-fu/][Python Kung-fu repository]].
 

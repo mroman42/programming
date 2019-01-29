@@ -1,3 +1,6 @@
+-- https://www.hackerrank.com/challenges/fighting-armies
+-- Uses fast IO and Binomial Trees.
+
 import Data.Sequence as Seq
 import Data.Foldable
 import Data.Vector.Mutable as Vect (replicate,unsafeRead,unsafeWrite,modify,unsafeModify,MVector)

@@ -9,9 +9,10 @@ compression (x:xs) (y:ys)
 linelen :: String -> String
 linelen x = show (length x) ++ " " ++ x
 
-main = do x <- getLine
-          y <- getLine
-          let (a,b,c) = compression x y
-          putStrLn $ linelen a
-          putStrLn $ linelen b
-          putStrLn $ linelen c
+main = do
+  x <- getLine
+  y <- getLine
+  let (a,b,c) = compression x y
+  putStrLn $ linelen a
+  putStrLn $ linelen b
+  putStrLn $ linelen c

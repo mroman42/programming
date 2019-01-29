@@ -1,3 +1,6 @@
+-- The sums of powers
+-- https://www.hackerrank.com/challenges/functional-programming-the-sums-of-powers
+
 forms :: [Int] -> Int -> Int
 forms _  0 = 1
 forms [] _ = 0

@@ -1,5 +1,3 @@
--- Problem statement: https://www.hackerrank.com/challenges/huge-gcd-fp
-
 (*.) a b = mod (a*b) 1000000007
 
 hugegcd :: [Int] -> [Int] -> Int
@@ -17,10 +15,10 @@ gcda a (b:bs) = (d *. g, (quot b d):ls)
     d      = gcd a b
     (g,ls) = gcda (quot a d) bs
 
+main :: IO ()
 main = do
   a <- readLn :: IO Int
   lista <- fmap ((map read) . words) getLine
   b <- readLn :: IO Int
   listb <- fmap ((map read) . words) getLine
   putStrLn . show $ hugegcd lista listb
-

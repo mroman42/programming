@@ -1,3 +1,5 @@
+-- Problem statement: https://www.hackerrank.com/challenges/lists-and-gcd
+
 import Control.Monad
 import Data.List (intercalate)
 

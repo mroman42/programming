@@ -12,4 +12,3 @@ input :: IO [String]
 input = do
   n <- readLn :: IO Int
   sequence $ map (\i -> getLine) [1..n]
-  

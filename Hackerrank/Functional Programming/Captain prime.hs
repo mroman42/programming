@@ -30,7 +30,7 @@ fate n
 
 main :: IO ()
 main = do
-  cases <- readLn 
+  cases <- readLn
   numbers <- mapM (\i -> readLn) [1..cases]
   let strings = map fate numbers
   mapM_ putStrLn strings
